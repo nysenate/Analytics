@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:ls="http://channel-api.livestream-api.com/2.0" version="2.0">
+	<channel>
+		<title>Mogulus Pro Showcase</title>
+		<link>http://www.livestream.com/proshowcase</link>
+		<description />
+		<image>
+			<url />
+		</image>
+		<language>English</language>
+		<category>Entertainment</category>
+		<pubDate>Fri, 17 Oct 2008 00:59:38 GMT</pubDate>
+		<ls:isPremium>true</ls:isPremium>
+		<ls:isLive>false</ls:isLive>
+		<ls:shortName>proshowcase</ls:shortName>
+		<ls:currentViewerCount>0</ls:currentViewerCount>
+		<ls:viewerMinutesToday>64</ls:viewerMinutesToday>
+		<ls:viewerMinutesThisWeek>84</ls:viewerMinutesThisWeek>
+		<ls:viewerMinutesThisMonth>1533</ls:viewerMinutesThisMonth>
+		<ls:totalViewerMinutes>330445</ls:totalViewerMinutes>
+		<ls:totalLibraryClips>6</ls:totalLibraryClips>
+		<ls:totalLibraryRecordings>0</ls:totalLibraryRecordings>
+		<ls:tags />
+		<ls:profile></ls:profile>
+		<ls:links />
+		<ls:bannerUrl>http://www.livestream.com/filestore/user-uploads/823F848F-76A3-B2AC-
+                              1D21-5F0503F3EC3A.png</ls:bannerUrl>
+	</channel>
+</rss>

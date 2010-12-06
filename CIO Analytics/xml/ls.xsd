@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://api.channel.livestream.com/2.0" xmlns:ls="http://api.channel.livestream.com/2.0">
+  <xs:import schemaLocation="livestreaminfo.xsd"/>
+  <xs:element name="isPremium" type="xs:boolean"/>
+  <xs:element name="isLive" type="xs:boolean"/>
+  <xs:element name="shortName" type="xs:NCName"/>
+  <xs:element name="currentViewerCount" type="xs:integer"/>
+  <xs:element name="viewerMinutesToday" type="xs:integer"/>
+  <xs:element name="viewerMinutesThisWeek" type="xs:integer"/>
+  <xs:element name="viewerMinutesThisMonth" type="xs:integer"/>
+  <xs:element name="totalViewerMinutes" type="xs:integer"/>
+  <xs:element name="totalLibraryClips" type="xs:integer"/>
+  <xs:element name="totalLibraryRecordings" type="xs:integer"/>
+  <xs:element name="tags" type="xs:string"/>
+  <xs:element name="profile">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="links" type="xs:string"/>
+  <xs:element name="promoUrl">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="bannerUrl">
+    <xs:complexType/>
+  </xs:element>
+</xs:schema>

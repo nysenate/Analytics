@@ -1,0 +1,12 @@
+package main;
+
+public class Main {
+	public static void main(String[] args) throws Exception {
+				
+		new analytics.google.v2.GAConnect();
+		
+		new analytics.livestream.parser.LiveStreamParser();
+		
+		new analytics.social.NYSenateAnalytics();
+	}
+}
