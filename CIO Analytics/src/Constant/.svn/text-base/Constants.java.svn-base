@@ -1,7 +1,0 @@
-package Constant;
-
-public interface Constants {
-
-	public static final String DATE = "07/31/2010";
-
-}
