@@ -16,8 +16,6 @@ import com.google.common.collect.Lists;
 import com.google.gdata.client.analytics.DataQuery;
 import com.google.gdata.data.analytics.DataEntry;
 import com.google.gdata.data.analytics.DataFeed;
-import com.google.gdata.data.analytics.Dimension;
-import com.google.gdata.data.analytics.Metric;
 
 public class Process {	
 	
@@ -111,6 +109,8 @@ public class Process {
 		}
 		
 		for(SenatorObject ao:senators) {
+			
+			System.out.println(ao.getUrlPath());
 			
 			DataQuery dq = gac.queryBuilderFilterRegex(props,prop,fil_s + ao.getUrlPath() + fil_e);
 			

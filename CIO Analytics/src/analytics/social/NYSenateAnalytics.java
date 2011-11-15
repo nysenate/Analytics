@@ -20,7 +20,6 @@ public class NYSenateAnalytics implements Constant.Constants  {
 		
 		createSocialCSV(senObjLst, Constants.DATE);
 		createFacebookCSV(senObjLst, Constants.DATE);
-		
 	}
 	
 	public void createFacebookCSV(List<NYSenateObject> senObjLst, String date) throws IOException  {
@@ -42,13 +41,15 @@ public class NYSenateAnalytics implements Constant.Constants  {
 		for(NYSenateObject temp:senObjLst) {
 			try {
 				if(temp.getFacebookURL() != null) {
-					temp.setFriends(getFriends(temp));
+					System.out.println(temp.getFacebookURL());
+					temp.setFriends(getFriends(temp.getFacebookURL()));
 					if(temp.getFriends() != null) {
+						System.out.println(temp.getFriends());
 						br.write(date + "," + temp.toFacebookString()+"\n");
 					}
 				}
 			} catch (Exception e) {
-				
+				e.printStackTrace();
 			}
 		}
 		br.close();
@@ -63,7 +64,7 @@ public class NYSenateAnalytics implements Constant.Constants  {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		br.write("Date,First,Last,Twitter,Facebook,Youtube,Flickr\n");
+		br.write("Date,First,Last,Twitter,Youtube,Facebook,Flickr\n");
 		for(NYSenateObject temp:senObjLst) {
 			br.write(date + "," + temp.toAnalyticsString()+"\n");
 		}
@@ -74,28 +75,28 @@ public class NYSenateAnalytics implements Constant.Constants  {
 	private BufferedReader getReader(String url) throws MalformedURLException, IOException {
 		return new BufferedReader(new InputStreamReader(new URL(url).openStream()));
 	}
+	
 	/*
 	 * File structure: "(lastname),(firstname + middle),(generational title),(facebookURL)" 
 	 */
-	private String getFriends(NYSenateObject fb) throws Exception {
-		if(fb.getFacebookURL() != null) { //if Senator has a facebook URL
-			BufferedReader br = getReader(fb.getFacebookURL());
+	public String getFriends(String facebookUrl) throws Exception {
+		if(facebookUrl != null) { //if Senator has a facebook URL
+			BufferedReader br = getReader(facebookUrl);
 			String webLine; //string being read from url
 			Boolean toggle = false; //true if match has been found
 			while((webLine = br.readLine()) != null && !toggle) {
-				Pattern fanPAttern = Pattern.compile("(\\d)+(,)?(\\d)* People");
-				Pattern friendPattern = Pattern.compile("(\\d)+(,)?(\\d)* friends");
-				Matcher fanM = fanPAttern.matcher(webLine);
-				Matcher friendM = friendPattern.matcher(webLine);
+				//237\u003c\/span>\u003c\/div>people like this
+				//1,598</span></div>people like this
+				Pattern likePattern = Pattern.compile("((\\d)+(,?(\\d)+)?)((</span>)?</div>| ) ?like this");
+				Matcher likeM = likePattern.matcher(webLine);
+				
 				String matchString = "";
-				if(fanM.find()) { //if facebook url is a fan page
-					matchString = new String(webLine.substring(fanM.start(), fanM.end())).split(" ")[0];
+
+				if(likeM.find()) {
+					matchString = new String(likeM.group(1));
 					toggle = true;
 				}
-				else if(friendM.find()) { //if facebook url is a personal page
-					matchString = new String(webLine.substring(friendM.start(), friendM.end())).split(" ")[0];
-					toggle = true;
-				}
+				
 				if(toggle) { //if match has been found assemble CSV
 					return matchString.replaceAll(",","");
 				}

@@ -1,11 +1,16 @@
 package analytics.google.v2;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -13,6 +18,7 @@ import com.google.gdata.client.analytics.AnalyticsService;
 import com.google.gdata.client.analytics.DataQuery;
 import com.google.gdata.data.analytics.AccountEntry;
 import com.google.gdata.data.analytics.AccountFeed;
+import com.google.gdata.data.analytics.DataEntry;
 import com.google.gdata.data.analytics.DataFeed;
 import com.google.gdata.util.AuthenticationException;
 
@@ -20,7 +26,7 @@ public class GAConnect {
 	
     public static final String ACCOUNT_URL = "https://www.google.com/analytics/feeds/accounts/default";
     public static final String DATA_URL = "https://www.google.com/analytics/feeds/data";
-    public static final int MAX_RESULTS = 500;
+    public static final int MAX_RESULTS = 1000;
     
     public static final String PROP = "analytics.";
 	
@@ -29,6 +35,15 @@ public class GAConnect {
 	public static void main(String[] args) throws Exception {
 		
 		new GAConnect();
+	}
+	
+	public GAConnect(boolean tog) throws IOException {
+		Properties props = new Properties();
+		FileInputStream fis = new FileInputStream("analytics.props");
+		props.load(fis);
+		fis.close();
+		
+		accountEntries(props);
 	}
 	
 	public GAConnect() throws Exception {
@@ -70,6 +85,54 @@ public class GAConnect {
 //			else if(name.matches("ja(ol|nys)r")) {
 //				Process.dayRangeViewsSearch(this, props, name);
 //			}
+			/*if(name.equals("oldsenators")) {
+				ArrayList<Integer> lVisits = new ArrayList<Integer>();
+				ArrayList<Integer> lBounces = new ArrayList<Integer>();
+				ArrayList<Double> lTimeOnPage = new ArrayList<Double>();
+				ArrayList<Integer> lNewVisits = new ArrayList<Integer>();
+				//ArrayList<Integer> lPageviews = new ArrayList<Integer>();
+				
+				BufferedReader br = new BufferedReader(new FileReader(new File("sen/dem")));
+				
+				String in = null;
+				
+				while((in = br.readLine()) != null) {
+					String[] tuple = in.split(",");
+					props.setProperty("analytics.oldsenators.id", in.split(",")[2]);
+					DataQuery dq = queryBuilderFilterRegex(props,"analytics.oldsenators",props.getProperty("analytics.oldsenators.filters"));
+					DataFeed df = getDataFeed(props, dq);
+					
+					int visits = 0;
+					int bounces = 0;
+					double timeOnPage = 0.0;
+					int newVisits = 0;
+					
+					for(DataEntry de:df.getEntries()) {
+						
+						visits += new Integer(de.stringValueOf("ga:visits"));
+						bounces += new Integer(de.stringValueOf("ga:bounces"));
+						timeOnPage += new Double(de.stringValueOf("ga:timeOnPage"));
+						newVisits += new Integer(de.stringValueOf("ga:newVisits"));
+						System.out.println(de.stringValueOf("ga:date") + ":" + de.stringValueOf("ga:visits"));
+					}
+					lVisits.add(visits);
+					lBounces.add(bounces);
+					lTimeOnPage.add(timeOnPage);
+					lNewVisits.add(newVisits);
+					System.out.print(tuple[0]+",");
+					break;
+				}
+				System.out.println();
+				for(int i:lVisits) { System.out.print(i+","); }
+				System.out.println();
+				for(int i:lBounces) { System.out.print(i+","); }
+				System.out.println();
+				for(double d:lTimeOnPage) { System.out.print(d+","); }
+				System.out.println();
+				for(int i:lNewVisits) { System.out.print(i+","); }
+				
+				br.close();
+			}*/
 			
 			bw.close();
 		}	
@@ -131,7 +194,7 @@ public class GAConnect {
 		
 		for(SourceObject so:lst) {
 			bw.write(date + ","
-					+ "\"" + so.getSource() + "\"" + ","
+					+ "\"" + so.getSource().replaceAll("(,|\")", " ") + "\"" + ","
 					+ (title ? "\"" + OpenLegConnect.get(so.getSource()) + "\"," : "")
 					+ so.getPageviews() + ","
 					+ so.getBounces() + ","
@@ -159,8 +222,13 @@ public class GAConnect {
 		AccountFeed af = getAccountFeed(props);
 		
 		for(AccountEntry ae: af.getEntries()) {
-			System.out.println(ae.getTitle().getPlainText());
-			System.out.println(ae.getProperty("ga:profileId"));
+			if(ae.getTitle().getPlainText().contains("/senator/")) {
+				String senName = ae.getTitle().getPlainText().split("/")[2];
+				String last = senName.split("\\-")[senName.split("\\-").length-1];
+				senName = senName.split("\\-")[senName.split("\\-").length-(last.equals("jr")? 2 : 1)];
+				System.out.println(senName+","+ae.getTitle().getPlainText().replace("www.nysenate.gov", "") +","+ae.getProperty("ga:profileId"));
+			}
+			
 		}		
 	}
 	
@@ -205,7 +273,7 @@ public class GAConnect {
 		String metrics = props.getProperty(id+".metrics");
 		String sort = props.getProperty(id+".sort");
 		String filter = props.getProperty(id+".filters");
-		
+				
 		try {
 			URL url = new URL(DATA_URL);
 			

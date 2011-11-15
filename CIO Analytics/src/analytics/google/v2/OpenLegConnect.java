@@ -20,27 +20,27 @@ public class OpenLegConnect {
 
 			String title = getTitle(URL + value,p);
 						
-			title = title.replaceAll("^<h2>","");
+			title = title.replaceAll("^\\s*<h2>","");
 			title = title.replaceAll("</h2>$","");
 			
-			return title;
+			return title.replaceAll("\"", "");
 		}
 		else if(value.contains("/meeting/")) {
 			String title = getTitle(URL + value);
 			
-			title = title.replaceAll("^<title>Committee Meeting: ", "");
+			title = title.replaceAll("^\\s+<title>Committee Meeting: ", "");
 			title = title.replaceAll(" - New York State Senate</title>$", "");
 			
-			return title;
+			return title.replaceAll("\"", "");
 		}
 		else if(value.contains("/calendar/")) {
 			Pattern p = Pattern.compile("<h2>Calendar no. \\d{1,5} \\((floor|active)\\) / Year: \\d{4} / Session: .*?</h2>");
 			
 			String title = getTitle(URL + value,p);
-			title = title.replaceAll("^<h2>","");
+			title = title.replaceAll("^\\s*<h2>","");
 			title = title.replaceAll("</h2>$","");
 				
-			return title;
+			return title.replaceAll("\"", "");
 		}
 		else if(value.contains("/search")) {
 			Pattern pattern = Pattern.compile("(\\?|&)\\w*?=[\\w\\W&&[^&]]*");
@@ -64,20 +64,27 @@ public class OpenLegConnect {
 			return ret.replaceAll("\"", "");
 		}
 		else { //it's a bill
-			Pattern p = Pattern.compile("<h2>[A-Z]\\d{2,5}:.*?</h2>");
+			Pattern p = Pattern.compile("<h2>[A-Z]\\d{2,5}\\w?\\-\\d{1,4}:.*?</h2>");
 
 			String title = getTitle(BILL_URL + value,p);
 
 			title = title.replaceAll("^\\s*<h2>","");
 			title = title.replaceAll("</h2>$","");
 
-			return title;
+			return title.replaceAll("\"", "");
 		}
 	}
 	
 	public static String getTitle(String url, Pattern p) throws Exception {
 		System.out.println(url);
-		BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+		BufferedReader br = null;
+		
+		try {
+			br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+		}
+		catch (Exception e) {
+			return "";
+		}
 		
 		String in = null;
 		
@@ -91,23 +98,27 @@ public class OpenLegConnect {
 		}
 		br.close();
 		
-		return null;
+		return "";
 	}
 	
 	public static String getTitle(String url) throws Exception {
 		System.out.println(url);
-
-		BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url.replaceAll(" ", "%20")).openStream()));
-		
-		String in = null;
-		
-		while((in = br.readLine()) != null) {
-			if(in.contains("<title>")) {
-				return in;
-				
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url.replaceAll(" ", "%20")).openStream()));
+			
+			String in = null;
+			
+			while((in = br.readLine()) != null) {
+				if(in.contains("<title>")) {
+					return in;
+					
+				}
 			}
+			br.close();
 		}
-		br.close();
+		catch(Exception e) {
+			return "";
+		}
 		
 		return null;
 	}

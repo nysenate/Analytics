@@ -70,7 +70,7 @@ public class LiveStreamParser implements Constant.Constants {
 	}
 	
 	public void writeUpdates(List<LiveStreamStat> lssList) throws IOException {
-		BufferedWriter bw = new BufferedWriter(new FileWriter(new File("scratch/livestream.csv")));
+		BufferedWriter bw = new BufferedWriter(new FileWriter(new File("scratch/livestream/livestream.csv")));
 		
 		bw.write("Date,Channel,Weekly Minutes,Total Minutes");
 		bw.newLine();

@@ -2,6 +2,6 @@ package Constant;
 
 public interface Constants {
 
-	public static final String DATE = "12/04/2010";
+	public static final String DATE = "11/07/2011";
 
 }
