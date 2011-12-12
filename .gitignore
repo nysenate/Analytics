@@ -1,0 +1,13 @@
+output
+scratch
+target
+.project
+.settings
+.classpath
+
+analytics.ini
+
+
+*.class
+*.swp
+*~

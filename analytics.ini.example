@@ -1,0 +1,135 @@
+[service:analytics]
+user=
+pass=
+account_url=https://www.google.com/analytics/feeds/accounts/default
+data_url=https://www.google.com/analytics/feeds/data
+app_name=
+start_date = 
+end_date = 
+
+[report:twitter]
+report_type = twitter
+output_file = scratch/nysenate_twitter_stats.csv
+start_date = 2009-06-01
+
+[report:facebook]
+report_type = facebook
+output_file = scratch/facebook.csv
+end_date = 
+
+[report:social]
+report_type = socialmedia
+output_file = scratch/social.csv
+end_date = 
+
+[report:livestream]
+report_type = livestream
+output_file = scratch/livestream.csv
+channels=nysenate,nysenate2,nysenate3,nysenate4,nysenatetesting,nysenate_aging,NYSenate_agriculture,NYSenate_banks,NYSenate_Budget_TaxReform,NYSenate_Children_Families,NYSenate_cities,NYSenate_Civil_Service_Pensions,NYSenate_Codes,NYSenate_Commerce,NYSenate_consumerprotection,NYSenate_CorpAuthComm,NYSenate_CulturalAffairs,NYSenate_Education,NYSenate_elections,NYSenate_EnergyTelcom,NYSenate_Environment,NYSenate_Ethics,NYSenate_Finance,NYSenate_Gaming,NYSenate_Health,NYSenate_HigherEducation,NYSenate_Housing,NYSenate_Insurance,NYSenate_Investigations_GovernmentOps,nysenate_joint_budget,NYSenate_Judiciary,NYSenate_Labor,NYSenate_LocalGov,NYSenate_MentalHealth,NYsenate_minority_newsconference,NYSenate_MTAcrpb,NYSenate_PuertoRican_LatinoCaucus,NYSenate_Rules,NYSenate_SocialServices,NYSenate_Transportation,NYSenate_UpstateCaucus,NYSenate_VetsHomeSecurityMil,NYSenate_VictimsCrimeCorrection,rulesreformandadministration
+end_date = 
+
+[report:senators]
+report_type = senators
+output_file = scratch/GA/senators.csv
+id = 16456134
+sort = -ga:pageviews
+dimensions = ga:pagePath,ga:source
+metrics = ga:pageviews,ga:bounces,ga:timeOnPage
+filters =
+count = 5
+column_headers = Source,Views,Bounces,Time
+
+[report:bills]
+report_type = bills
+output_file = scratch/GA/viewedbills.csv
+dimensions = ga:pagePath,ga:source
+metrics = ga:pageviews,ga:bounces,ga:timeOnPage
+sort = -ga:pageviews
+filters = ga:pagePath=~/bill/.+;ga:pagePath!@/2.0/
+id = 19016771
+count = 5
+column_headers = Date,Bill,Title,Source,Views,Bounces,Time
+amended=false
+
+[report:openleg_transcripts]
+report_type = simple_analytics
+output_file = scratch/GA/viewedtranscripts.csv
+dimensions = ga:pagePath
+metrics = ga:pageviews,ga:bounces,ga:timeOnPage
+sort = -ga:pageviews
+filters = ga:pagePath=~/transcript/.+;ga:pagePath!@/2.0/;ga:pagePath!@query;ga:pagePath=@2009,ga:pagePath=@2010,ga:pagePath=@2011
+id = 19016771
+max_results = 5
+has_openleg=title
+
+[report:openleg_calendars]
+report_type = simple_analytics
+output_file = scratch/GA/viewedcalendars.csv
+dimensions = ga:pagePath
+metrics = ga:pageviews,ga:bounces,ga:timeOnPage
+sort = -ga:pageviews
+filters = ga:pagePath=~/calendar/.+;ga:pagePath!@/2.0/;ga:pagePath!@cal\-;ga:pagePath!@mobile
+id = 19016771
+max_results = 5
+has_openleg=title
+
+[report:openleg_meetings]
+report_type = simple_analytics
+output_file = scratch/GA/viewedmeetings.csv
+dimensions = ga:pagePath
+metrics = ga:pageviews,ga:bounces,ga:timeOnPage
+sort = -ga:pageviews
+filters = ga:pagePath=~/meeting/.+;ga:pagePath!@/2.0/;ga:pagePath!@/meeting\-;ga:pagePath!@/a\-
+id = 19016771
+max_results = 5
+has_openleg=title
+
+[report:openleg_keywords]
+report_type = simple_analytics
+output_file = scratch/GA/topkeyword.csv
+dimensions = ga:pagePath
+metrics = ga:pageviews,ga:bounces,ga:timeOnPage
+sort = -ga:pageviews
+filters = ga:pagePath=~/search/.+;ga:pagePath!@/2.0/
+bunkfilter = ga:pagePath!@otype
+id = 19016771
+max_results = 5
+column_headers = Date,Source,Keyword,Views,Bounces,Time
+has_openleg=keyword
+
+;[report:openleg_mainsite]
+;report_type = simple_analytics
+;output_file = scratch/GA/openleg_stats.csv
+;dimensions = ga:pagePath,ga:source
+;metrics = ga:pageviews,ga:bounces,ga:timeOnPage
+;sort = -ga:pageviews
+;filters = ga:pagePath==/legislation/
+;id = 19016771
+;max_count = 5
+;has_title=false
+
+[report:homepage]
+report_type = simple_analytics
+output_file = scratch/GA/nysenate_homepage_all_daily.csv
+id = 16456134
+start_date = 2009-05-03
+dimensions = ga:date,ga:pagePath
+metrics = ga:pageViews,ga:uniquePageviews,ga:bounces,ga:newVisits
+sort =
+filters = ga:pagePath==/
+
+[report:mainsite]
+report_type = simple_analytics
+output_file = scratch/GA/nysenate_mainsite_all_daily.csv
+id = 16456134
+start_date = 2009-05-03
+dimensions = ga:date
+metrics = ga:visits,ga:visitors,ga:pageViews,ga:bounces,ga:timeOnSite,ga:newVisits
+
+[report:opensite]
+report_type = simple_analytics
+output_file = scratch/GA/nysenate_opensite_all_daily.csv
+id = 19016771
+start_date = 2009-05-03
+dimensions = ga:date
+metrics = ga:visits,ga:visitors,ga:pageViews,ga:bounces,ga:timeOnSite,ga:newVisits
