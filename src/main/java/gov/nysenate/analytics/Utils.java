@@ -75,7 +75,7 @@ public class Utils
 				tSObj.fName = strings[1];
 				tSObj.lName = strings[0];
 			}
-			if(in.contains("social_buttons")) {
+			if(in.contains("social_buttons") && tSObj != null) {
 				if(facebookM.find()) {
 					s = in.substring(facebookM.start());
 					s = s.split("\"")[0];
