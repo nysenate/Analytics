@@ -115,7 +115,7 @@ id = 16456134
 start_date = 2009-05-03
 dimensions = ga:date,ga:pagePath
 metrics = ga:pageViews,ga:uniquePageviews,ga:bounces,ga:newVisits
-sort =
+; sort =
 filters = ga:pagePath==/
 
 [report:mainsite]

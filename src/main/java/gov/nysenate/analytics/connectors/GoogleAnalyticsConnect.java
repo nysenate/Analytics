@@ -56,6 +56,7 @@ public class GoogleAnalyticsConnect {
 				query.setMaxResults(Integer.parseInt(params.get("max_results")));
 			
 			query.setIds("ga:"+params.get("id"));
+			query.setMaxResults(10000); // The max it can handle
 			query.setStartDate(this.getDateString("start_date", params));
 			query.setEndDate(this.getDateString("end_date", params));
 			
