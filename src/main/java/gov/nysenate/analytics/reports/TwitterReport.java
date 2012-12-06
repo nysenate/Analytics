@@ -11,15 +11,26 @@ import java.util.List;
 
 import org.ini4j.Profile.Section;
 
+import winterwell.jtwitter.OAuthSignpostClient;
+import winterwell.jtwitter.Status;
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.TwitterException;
-
+import winterwell.jtwitter.User;
 
 public class TwitterReport
 {
     public static boolean generateCSV(List<NYSenate> nySenateData, Section params) {
     	try {
-	    	Twitter twitter = new Twitter();
+            Twitter twitter = new Twitter(
+	                "SenateAnalytics",
+	                new OAuthSignpostClient(
+	                        params.get("consumer_key"),
+	                        params.get("consumer_secret"),
+	                        params.get("access_key"),
+	                        params.get("access_secret")
+	                    )
+			);
+
 	    	BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
 	        bw.write("profileName,id,friends,followers,favorites,statuses,mentions,hashtags,created,website");
 	        bw.newLine();
@@ -30,10 +41,10 @@ public class TwitterReport
 		        		String[] urlParts = senator.twitterURL.split("/");
 		        		String profileName = urlParts[urlParts.length-1];
 			        	System.out.println("  Processing: "+profileName);
-			            Twitter.User twitterUser = twitter.show(profileName);
-			            List<Twitter.Status> mentions = twitter.search("@"+profileName+" since:"+params.get("start_date"));
-			            List<Twitter.Status> hashtags = twitter.search("#"+profileName+" since:"+params.get("start_date"));
-			            
+			            User twitterUser = twitter.users().getUser(profileName);
+			            List<Status> mentions = twitter.search("@"+profileName+" since:"+params.get("start_date"));
+			            List<Status> hashtags = twitter.search("#"+profileName+" since:"+params.get("start_date"));
+
 			            //This can sometimes be null
 			            URI website = twitterUser.getWebsite();
 			            
