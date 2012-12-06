@@ -78,6 +78,7 @@ public class GoogleAnalyticsConnect {
             System.err.println("Network error trying to retrieve feed: " + e.getMessage());
         } catch (ServiceException e) {
             System.err.println("Analytics API responded with an error message: " + e.getMessage());
+            System.out.println(e.getResponseBody());
         }
 		return null;
 	}
