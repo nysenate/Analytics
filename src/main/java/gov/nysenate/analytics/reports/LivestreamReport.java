@@ -31,14 +31,14 @@ public class LivestreamReport {
 			bw.write("Date,Channel,Minutes this Month,Total Minutes");
 			bw.newLine();
 			
-			int weeklyTotal = 0, allTimeTotal = 0;
+			int monthTotal = 0, allTimeTotal = 0;
 			for(String channelName : params.get("channels").split(",")) {
 				try {
 					URL url = new URL(apiUrlStart + channelName + apiUrlEnd);
 					System.out.println(url);
 					
 					Channel channel = ((Rss)jc.createUnmarshaller().unmarshal( url )).getChannel();
-					weeklyTotal += channel.getViewerMinutesThisWeek();
+					monthTotal += channel.getViewerMinutesThisMonth();
 					allTimeTotal += channel.getTotalViewerMinutes();
 		
 					bw.write(
@@ -57,7 +57,7 @@ public class LivestreamReport {
 					e.printStackTrace();
 				}
 			}
-			bw.write("\n,Total," + weeklyTotal + ","+allTimeTotal);
+			bw.write("\n,Total," + monthTotal + ","+allTimeTotal);
 			bw.close();
 			return true;
 		} catch (JAXBException e) {
