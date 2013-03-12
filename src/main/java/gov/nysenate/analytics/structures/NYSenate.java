@@ -9,13 +9,13 @@ public class NYSenate {
 	public String youtubeURL;
 	public String nysenateURL;
 	public String friends;
-	
+
 	public NYSenate() {}
 
 	public String toString() {
 		return ((fName != null) ? fName : "")
 			+ ((lName != null) ? "," + lName : ",")
-			+ ((twitterURL!=null) ? "\n---->" + twitterURL : "") 
+			+ ((twitterURL!=null) ? "\n---->" + twitterURL : "")
 			+ ((youtubeURL!=null) ? "\n---->" + youtubeURL: "")
 			+ ((facebookURL!= null) ? "\n---->" + facebookURL + ",Fans " + ((friends != null) ? friends : "") : "")
 			+ ((flickrURL!=null) ? "\n---->" + flickrURL : "");
@@ -23,7 +23,7 @@ public class NYSenate {
 	public String toAnalyticsString() {
 		return ((fName != null) ? fName : "")
 			+ ((lName != null) ? "," + lName : ",")
-			+ ((twitterURL!=null) ? "," + twitterURL : ",") 
+			+ ((twitterURL!=null) ? "," + twitterURL : ",")
 			+ ((youtubeURL!=null) ? "," + youtubeURL: ",")
 			+ ((facebookURL!= null) ? "," + facebookURL : ",")
 			+ ((flickrURL!=null) ? "," + flickrURL : ",");

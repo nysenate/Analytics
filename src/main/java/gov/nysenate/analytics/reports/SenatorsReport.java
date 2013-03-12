@@ -17,21 +17,21 @@ import org.ini4j.Profile.Section;
 import com.google.gdata.data.analytics.DataFeed;
 
 public class SenatorsReport {
-	
+
 	public static boolean generateCSV(GoogleAnalyticsConnect gac, List<NYSenate> senators, Section params) {
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
 			for(NYSenate senator:senators) {
 				if(senator.fName.equals("NYSenate")) continue;
-				
+
 				double totalTime = 0;
 				int totalBounces = 0, totalPageviews = 0;
 				System.out.println("  "+senator.nysenateURL);
-				
+
 				//Print out the CSV header
 				bw.write(senator.fName + " " + senator.lName); bw.newLine();
 				bw.write(params.get("column_headers")); bw.newLine();
-				
+
 				// Add a filter and retrieve the senator's stats by source
 				params.put("filters", "ga:pagePath=~^"+senator.nysenateURL+".*");
 				DataFeed df = gac.getDataFeed(params);
@@ -41,12 +41,12 @@ public class SenatorsReport {
 				for(Source so:Utils.groupOthers(lst, Integer.parseInt(params.get("count")))) {
 					bw.write(so.source + "," + so.pageviews + "," + so.bounces + "," + so.time);
 					bw.newLine();
-					
+
 					totalBounces += so.bounces;
 					totalPageviews += so.pageviews;
 					totalTime += so.time;
 				}
-				
+
 				bw.write("Total"+"," + totalPageviews + "," + totalBounces + "," + totalTime);
 				bw.newLine(); bw.newLine();
 			}

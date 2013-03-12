@@ -18,29 +18,29 @@ import com.livestream.api.generated.Channel;
 import com.livestream.api.generated.Rss;
 
 public class LivestreamReport {
-	
+
 	public static final String apiUrlStart = "http://x";
 	public static final String apiUrlEnd = "x.channel-api.livestream-api.com/2.0/info";
 
 	public static boolean generateCSV(Section params) {
 		try{
 			JAXBContext jc = JAXBContext.newInstance( "com.livestream.api.generated" );
-		
+
 			// Get the file started with a simple header
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
 			bw.write("Date,Channel,Minutes this Month,Total Minutes");
 			bw.newLine();
-			
+
 			int monthTotal = 0, allTimeTotal = 0;
 			for(String channelName : params.get("channels").split(",")) {
 				try {
 					URL url = new URL(apiUrlStart + channelName + apiUrlEnd);
 					System.out.println(url);
-					
+
 					Channel channel = ((Rss)jc.createUnmarshaller().unmarshal( url )).getChannel();
 					monthTotal += channel.getViewerMinutesThisMonth();
 					allTimeTotal += channel.getTotalViewerMinutes();
-		
+
 					bw.write(
 						  params.get("end_date") + ","
 		  			    + channel.getTitle().replaceAll(","," ") + ","
@@ -62,7 +62,7 @@ public class LivestreamReport {
 			return true;
 		} catch (JAXBException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();			
+			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

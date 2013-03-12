@@ -25,28 +25,28 @@ public class BillsReport {
 		try {
 			ArrayList<String> topBills = new ArrayList<String>();
 			Pattern p = Pattern.compile("[a-zA-Z][.-]?\\d{3,5}[.-]?[a-zA-Z]?\\-\\d{1,4}");
-		
+
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
 			bw.write(params.get("column_headers"));
 			bw.newLine();
-		
+
 			for(DataEntry entry : gac.getDataFeed(params).getEntries()) {
 				String billUri = entry.stringValueOf("ga:pagePath");
 				Matcher m = p.matcher(billUri);
 				if(m.find()) {
-					String bill = billUri.substring(m.start(),m.end());			
+					String bill = billUri.substring(m.start(),m.end());
 					if(!(params.get("amended")=="true") && bill.matches("^[a-zA-Z][.-]?\\d{3,5}[.-]?[a-zA-Z]$")) {
 						bill = billUri.substring(m.start(),m.end()-1);
 					}
-					
+
 					String title = OpenLegislationConnect.get(bill);
-					
+
 					params.put("filters", "ga:pagePath=@" + bill);
 					List<Source> lst = Utils.combineDataFeedBySource(gac.getDataFeed(params).getEntries(), "/bill/");
 					Collections.sort(lst);
 					for(Source source:Utils.groupOthers(lst, Integer.parseInt(params.get("count")))) {
-						bw.write(gac.getDateString("end_date", params) + "," 
-								+ bill + ",\"" 
+						bw.write(gac.getDateString("end_date", params) + ","
+								+ bill + ",\""
 								+ title + "\","
 								+ source.source + ","
 								+ source.pageviews + ","
@@ -54,7 +54,7 @@ public class BillsReport {
 								+ source.time);
 						bw.newLine();
 					}
-					
+
 					if(!topBills.contains(bill)) {
 						topBills.add(bill);
 						if(topBills.size() == Integer.parseInt(params.get("count")))
@@ -64,7 +64,7 @@ public class BillsReport {
 			}
 			bw.close();
 			return true;
-			
+
 		} catch (IOException e) {
 			System.out.println("[bill]:output_file could not be opened for writing"+e.getMessage());
 		} catch (Exception e) {

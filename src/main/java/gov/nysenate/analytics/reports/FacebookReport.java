@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 import org.ini4j.Profile.Section;
 
 public class FacebookReport {
-	
+
 	public static boolean generateCSV(List<NYSenate> nySenateData, Section params) {
 		try {
 			String webLine;

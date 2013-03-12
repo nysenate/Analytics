@@ -34,7 +34,7 @@ public class TwitterReport
 	    	BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
 	        bw.write("profileName,id,friends,followers,favorites,statuses,mentions,hashtags,created,website");
 	        bw.newLine();
-	        
+
 	        for (NYSenate senator : nySenateData) {
 	        	try {
 	        		if(senator.twitterURL != null) {
@@ -47,7 +47,7 @@ public class TwitterReport
 
 			            //This can sometimes be null
 			            URI website = twitterUser.getWebsite();
-			            
+
 			            bw.write(
 		        			profileName + "," +
 		            		twitterUser.getId() + "," +
