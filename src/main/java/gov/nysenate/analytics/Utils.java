@@ -1,12 +1,18 @@
 package gov.nysenate.analytics;
 
+import gov.nysenate.analytics.reports.YoutubeReport;
 import gov.nysenate.analytics.structures.NYSenate;
 import gov.nysenate.analytics.structures.Source;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,6 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.ini4j.Ini;
+import org.ini4j.Profile.Section;
 
 import com.google.common.collect.Lists;
 import com.google.gdata.data.analytics.DataEntry;
@@ -41,7 +55,14 @@ public class Utils
 
 	//creates a new BufferedReader for a given url
 	public static BufferedReader getReader(String url) throws MalformedURLException, IOException {
-		return new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+		System.out.println("URL..." + url);
+		return new BufferedReader(new InputStreamReader(new URL(url).openStream(), "UTF-8"));
+	}
+
+	//creates a new BufferedReader for a given url
+	public static BufferedReader getURLWithQueryStringReader(String url) throws MalformedURLException, IOException {
+        HttpURLConnection httpUrlConnection = (HttpURLConnection) (new URL(url)).openConnection();
+        return new BufferedReader(new InputStreamReader(httpUrlConnection.getInputStream(), "UTF-8") );
 	}
 
 	public static List<NYSenate> SenatorData() throws IOException, InterruptedException {
@@ -191,5 +212,43 @@ public class Utils
 
 		return ret;
 	}
+
+	/*public static void convertCSVtoXSL(Ini config) throws Exception{
+        Workbook wb = new HSSFWorkbook();
+        CreationHelper helper = wb.getCreationHelper();
+
+        for(Map.Entry<String,Section> entry : config.entrySet()) {
+			//Skip non-report related blocks
+			if(!entry.getKey().startsWith("report:")) continue;
+
+			//Get the report type and log the start of processing
+			String report_type = entry.getKey().split(":")[1];
+			String fileName = entry.getValue().get("output_file");
+			System.out.println("Addind sheet for: "+report_type);
+
+			Sheet sheet = wb.createSheet(report_type);
+	        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(fileName))));
+
+			String webLine = "";
+
+	        int r = 0;
+	        while ((webLine = br.readLine()) != null) {
+	            Row row = sheet.createRow((short) r++);
+	            String[] line = webLine.split(",");
+
+	            for (int i = 0; i < line.length; i++)
+	                row.createCell(i)
+	                   .setCellValue(helper.createRichTextString(line[i]));
+	        }
+
+		}
+
+        // Write the output to a file
+        FileOutputStream fileOut = new FileOutputStream("scratch/workbook.xls");
+        wb.write(fileOut);
+        fileOut.close();
+	}*/
+
+
 
 } // class Utils

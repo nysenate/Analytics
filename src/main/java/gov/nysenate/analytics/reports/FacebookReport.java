@@ -15,35 +15,95 @@ import java.util.regex.Pattern;
 
 import org.ini4j.Profile.Section;
 
-public class FacebookReport {
+import com.restfb.Connection;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.FacebookClient.AccessToken;
+import com.restfb.types.Page;
+import com.restfb.types.User;
 
+/**
+ *
+ * @author aaakulkarni
+ *
+ */
+public class FacebookReport {
+	/**
+	 *
+	 * @param nySenateData
+	 * @param params
+	 * @return
+	 */
 	public static boolean generateCSV(List<NYSenate> nySenateData, Section params) {
 		try {
-			String webLine;
-			Pattern likePattern = Pattern.compile("([0-9,]+)\\\\u003c\\\\/span>\\\\u003c\\\\/div> *like this");
+			DefaultFacebookClient client = new DefaultFacebookClient();
+			AccessToken accessToken = client.obtainAppAccessToken("471573169552684", "a2dc234abf47c4ce930a4d3cb5d2b017");
+
+			FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
 			BufferedWriter bw = new BufferedWriter(new FileWriter(params.get("output_file")));
 			bw.write("Date,First,Last,URL,Fans\n");
 			for(NYSenate temp:nySenateData) {
 				try {
 					if(temp.facebookURL == null) continue;
 
-					System.out.println("  "+temp.facebookURL);
-					BufferedReader br = Utils.getReader(temp.facebookURL);
-					while((webLine = br.readLine()) != null) {
-						Matcher likeM = likePattern.matcher(webLine);
-						if(likeM.find()) {
-							System.out.println("  [Match Found] "+likeM.group(1).replaceAll(",",""));
-							temp.friends = likeM.group(1).replaceAll(",", "");
+					String pName = "";
+					String partialFBURL = temp.facebookURL.substring(temp.facebookURL.indexOf(".com/"));
+					String[] facebookURLArray = partialFBURL.split("/");
+
+					if(facebookURLArray.length == 4){
+						pName = facebookURLArray[3];
+					} else if(facebookURLArray.length == 2){
+						pName = facebookURLArray[1];
+					}
+					if( pName.indexOf("?") > 0)
+						pName = pName.substring(0, pName.indexOf("?"));
+
+					System.out.println("accountlocation:: facebook.com/"+ pName);
+					Page page = null;
+					String count = "Non-public";
+					try{
+						System.out.println("read as page:: ");
+						page = facebookClient.fetchObject(pName, Page.class);
+						if(null != page){
+							count = page.getLikes().toString();
+						}
+					} catch (Exception e){
+						count = "nonPublicPage";
+					}
+
+				try{
+					if( "Non-public".equalsIgnoreCase(count) || "nonPublicPage".equalsIgnoreCase(count)){
+						System.out.println("read as User:: ");
+						User user = facebookClient.fetchObject(pName, User.class);
+						if(user!= null && user.getMetadata() != null && null != user.getMetadata().getConnections() && null != user.getMetadata().getConnections().getFriends()){
+							count = user.getMetadata().getConnections().getFriends();
+						} else {
+							Connection<User> myFriends = null;
+							try{
+								myFriends = facebookClient.fetchConnection(pName.concat("/friends"), User.class);
+							} catch (Exception e) {
+							}
+
+							if(null != myFriends ){
+								count = Integer.toString(myFriends.getData().size());
+							} else{
+								System.out.println(user);
+								count = "Non-public";
+							}
 						}
 					}
-					br.close();
 
+				} catch (Exception e){
+					count = "Not-exist";
+				}
+
+					System.out.println("final count " + count);
 					bw.write(
 							params.get("end_date") + ","
 					     + ((temp.fName != null) ? temp.fName : "") + ","
 						 + ((temp.lName != null) ? temp.lName : "") + ","
 						 + ((temp.facebookURL != null) ? temp.facebookURL : "") + ","
-						 + ((temp.friends != null) ? temp.friends : "Non-public")
+						 + count
 					 );
 					bw.newLine();
 

@@ -133,3 +133,15 @@ id = 19016771
 start_date = 2009-05-03
 dimensions = ga:date
 metrics = ga:visits,ga:visitors,ga:pageViews,ga:bounces,ga:timeOnSite,ga:newVisits
+
+[email]
+sender =
+recipients =
+message_body = hallo see the attachment
+subject = analytics_reports
+attachments = scratch/socialReport.xls
+hostname =
+port =
+user =
+pass =
+
