@@ -1,7 +1,5 @@
 package gov.nysenate.analytics.reports;
 
-import gov.nysenate.analytics.CSVReport;
-
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;

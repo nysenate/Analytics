@@ -1,6 +1,5 @@
 package gov.nysenate.analytics.reports;
 
-import gov.nysenate.analytics.CSVReport;
 import gov.nysenate.analytics.models.NYSenate;
 
 import java.io.BufferedWriter;

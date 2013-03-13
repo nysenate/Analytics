@@ -1,4 +1,4 @@
-package gov.nysenate.analytics;
+package gov.nysenate.analytics.reports;
 
 import java.io.BufferedWriter;
 import java.io.File;
