@@ -1,6 +1,6 @@
 package gov.nysenate.analytics.reports;
 
-import gov.nysenate.analytics.structures.NYSenate;
+import gov.nysenate.analytics.models.NYSenate;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;

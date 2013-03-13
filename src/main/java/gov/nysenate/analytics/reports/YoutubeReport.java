@@ -1,7 +1,7 @@
 package gov.nysenate.analytics.reports;
 
 import gov.nysenate.analytics.Utils;
-import gov.nysenate.analytics.structures.NYSenate;
+import gov.nysenate.analytics.models.NYSenate;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,6 +19,12 @@ public class YoutubeReport
 {
     public static boolean generateCSV(List<NYSenate> nySenateData, Section params)
     {
+        // And the NYSenate's "uncut" youtube channel.
+        NYSenate uncutObj = new NYSenate();
+        uncutObj.fName = "NYSenateUncut";
+        uncutObj.youtubeURL = "http://www.youtube.com/user/nysenateuncut";
+        nySenateData.add(uncutObj);
+
         try {
 
             String webLine;

@@ -1,7 +1,7 @@
 package gov.nysenate.analytics;
 
-import gov.nysenate.analytics.structures.NYSenate;
-import gov.nysenate.analytics.structures.Source;
+import gov.nysenate.analytics.models.NYSenate;
+import gov.nysenate.analytics.models.Source;
 
 import java.io.BufferedReader;
 import java.io.IOException;

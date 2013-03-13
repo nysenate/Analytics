@@ -2,8 +2,8 @@ package gov.nysenate.analytics.reports;
 
 import gov.nysenate.analytics.Utils;
 import gov.nysenate.analytics.connectors.GoogleAnalyticsConnect;
-import gov.nysenate.analytics.structures.NYSenate;
-import gov.nysenate.analytics.structures.Source;
+import gov.nysenate.analytics.models.NYSenate;
+import gov.nysenate.analytics.models.Source;
 
 import java.io.BufferedWriter;
 import java.io.File;

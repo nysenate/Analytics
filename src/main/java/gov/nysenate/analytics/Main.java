@@ -1,6 +1,7 @@
 package gov.nysenate.analytics;
 
 import gov.nysenate.analytics.connectors.GoogleAnalyticsConnect;
+import gov.nysenate.analytics.models.NYSenate;
 import gov.nysenate.analytics.reports.BillsReport;
 import gov.nysenate.analytics.reports.ExcelReport;
 import gov.nysenate.analytics.reports.ExcelReportEmail;
@@ -11,7 +12,6 @@ import gov.nysenate.analytics.reports.SimpleReport;
 import gov.nysenate.analytics.reports.SocialMediaReport;
 import gov.nysenate.analytics.reports.TwitterReport;
 import gov.nysenate.analytics.reports.YoutubeReport;
-import gov.nysenate.analytics.structures.NYSenate;
 
 import java.io.File;
 import java.util.List;
@@ -26,114 +26,137 @@ import org.ini4j.Profile.Section;
 
 public class Main
 {
-
+    /**
+     * @author GraylinKim
+     * 
+     * @param args
+     *            A list of strings read in as Posix command line arguments
+     * 
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception
     {
-        CommandLine opts = null;
-
         try {
-            Options options = new Options()
-                    .addOption("s", "start_date", true, "Start Date of the Report.")
-                    .addOption("e", "end_date", true, "End Date of the Report.")
-                    .addOption("h", "help", false, "Print this message");
-            opts = new PosixParser().parse(options, args);
-            System.out.println(" req length >>" + opts.getOptionValue('e') + "<<");
+            Options options = new Options();
+            options.addOption("s", "start-date", true, "Start Date of the Report.");
+            options.addOption("e", "end-date", true, "End Date of the Report.");
+            options.addOption("f", "ini-file", true, "Path to configuration file.");
+            options.addOption("h", "help", false, "Print this message");
+            CommandLine opts = new PosixParser().parse(options, args);
 
-            System.out.println(" req  " + opts.getOptionValue('s'));
             if (opts.hasOption("-h")) {
-                System.err.println("USAGE: Main --start_date yyyy-mm-dd --end_date yyyy-mm-dd ");
+                System.out.println("USAGE: Main [-s|--start_date] yyyy-mm-dd [-e|--end_date] yyyy-mm-dd ");
                 System.exit(0);
             }
-            if (!opts.hasOption('s') && !opts.hasOption('e')) {
-                System.err.println("--start_date  and --end_date is required..");
-                System.err.println("USAGE:Main --start_date yyyy-mm-dd --end_date yyyy-mm-dd ");
+            else if (!opts.hasOption('s') || !opts.hasOption('e') || !opts.hasOption('f')) {
+                System.err.println("--start-date, --end-date, and --ini-file are required..");
+                System.err.println("USAGE: Main -s|--start-date yyyy-mm-dd -e|--end-date yyyy-mm-dd -f|--ini-file PATH_TO_FILE");
                 System.exit(1);
             }
+
+            File iniFile = new File(opts.getOptionValue('f'));
+            String startDate = opts.getOptionValue('s');
+            String endDate = opts.getOptionValue('e');
+            String dateFormat = "^\\d{4}-\\d{2}-\\d{2}$";
+
+            if (!startDate.matches(dateFormat)) {
+                System.err.println("Invalid start-date `" + startDate + "`; yyyy-mm-dd required");
+                System.exit(1);
+            }
+            else if (!endDate.matches(dateFormat)) {
+                System.err.println("Invalid end-date `" + endDate + "`; yyyy-mm-dd required");
+                System.exit(1);
+            }
+            else if (!iniFile.isFile()) {
+                System.err.println("Invalid ini-file `" + iniFile.getAbsoluteFile() + "`");
+                System.exit(1);
+            }
+
+            run(new Ini(iniFile), startDate, endDate);
         }
         catch (ParseException e) {
-            e.printStackTrace();
+            System.err.println("Unable to parse command line arguments." + e);
+            e.printStackTrace(System.err);
             System.exit(1);
         }
+    }
 
-        Ini config = new Ini(new File("analytics.ini"));
-        Section serviceConfig = config.get("service:analytics");
-        if (opts.hasOption("-start_date")) {
-            serviceConfig.add("start_date", opts.getOptionValue('s'));
-        }
-        if (opts.hasOption("-end_date")) {
-            serviceConfig.add("end_date", opts.getOptionValue('e'));
-        }
+    /**
+     * @author GraylinKim
+     * 
+     * @param config
+     *            Active configuration object. See analytics.ini.example.
+     * 
+     * @param startDate
+     *            The start date to be injected into report configurations that do not specify a
+     *            start date.
+     * 
+     * @param endDate
+     *            The end date to be injected into report configurations that do not specify an end
+     *            date.
+     * 
+     * @throws Exception
+     */
+    public static void run(Ini config, String startDate, String endDate) throws Exception
+    {
+        Section analyticsConfig = config.get("service:analytics");
+        GoogleAnalyticsConnect googleConnector = new GoogleAnalyticsConnect(
+                analyticsConfig.get("user"),
+                analyticsConfig.get("pass"),
+                analyticsConfig.get("app_name")
+                );
 
-        // Ini config = new Ini(new File("analytics.ini"));
-        GoogleAnalyticsConnect googleConnector = new GoogleAnalyticsConnect(config.get("service:analytics"));
-
-        // Set the senator data from the .gov website. Add the NYSenate Accounts
-        List<NYSenate> senatorData = Utils.SenatorData();
-        NYSenate tObj = new NYSenate();
-        tObj.fName = "NYSenate";
-        tObj.twitterURL = "http://www.twitter.com/nysenate";
-        tObj.facebookURL = "http://www.facebook.com/NYsenate";
-        tObj.youtubeURL = "http://www.youtube.com/user/NYSenate";
-        senatorData.add(tObj);
-
-        NYSenate uncutObj = new NYSenate();
-        uncutObj.fName = "NYSenateUncut";
-        uncutObj.youtubeURL = "http://www.youtube.com/user/nysenateuncut";
-        senatorData.add(uncutObj);
+        List<NYSenate> senatorData = Utils.getSenateData();
 
         for (Map.Entry<String, Section> entry : config.entrySet()) {
-            // Skip non-report related blocks
+            // Skip non-report blocks
             if (!entry.getKey().startsWith("report:"))
                 continue;
 
-            // if(!entry.getValue().get("report_type").equals("simple_analytics"))
-            // continue;
-
-            // Get the report type and log the start of processing
-            String report_type = entry.getValue().get("report_type");
-            System.out.println("Processing: " + entry.getKey() + ", Report Type: " + report_type);
-
-            if (report_type.equals("senators"))
-                SenatorsReport.generateCSV(googleConnector, senatorData, entry.getValue());
-
-            else if (report_type.equals("bills"))
-                BillsReport.generateCSV(googleConnector, entry.getValue());
-
-            else if (report_type.equals("simple_analytics"))
-                SimpleReport.generateCSV(googleConnector, entry.getValue());
-
-            else if (report_type.equals("livestream")) {
-                Section params = entry.getValue();
-                params.put("end_date", config.get("service:analytics", "end_date"));
-                LivestreamReport.generateCSV(params);
+            // Inject missing start/end dates into the report configuration
+            Section reportConfig = entry.getValue();
+            if (!reportConfig.containsKey("start_date")) {
+                reportConfig.add("start_date", startDate);
+            }
+            if (!reportConfig.containsKey("end_date")) {
+                reportConfig.add("end_date", endDate);
             }
 
-            else if (report_type.equals("twitter"))
-                TwitterReport.generateCSV(senatorData, entry.getValue());
-
-            else if (report_type.equals("facebook")) {
-                Section params = entry.getValue();
-                params.put("end_date", config.get("service:analytics", "end_date"));
-                FacebookReport.generateCSV(senatorData, params);
-            }
-
-            else if (report_type.equals("youtube")) {
-                Section params = entry.getValue();
-                params.put("end_date", config.get("service:analytics", "end_date"));
-                YoutubeReport.generateCSV(senatorData, params);
-            }
-
-            else if (report_type.equals("socialmedia")) {
-                Section params = entry.getValue();
-                params.put("end_date", config.get("service:analytics", "end_date"));
-                SocialMediaReport.generateCSV(senatorData, params);
+            String reportType = reportConfig.get("report_type");
+            System.out.println("Processing: " + reportType + " report.");
+            switch (reportType) {
+            case "senators":
+                SenatorsReport.generateCSV(googleConnector, senatorData, reportConfig);
+                break;
+            case "bills":
+                BillsReport.generateCSV(googleConnector, reportConfig);
+                break;
+            case "simple_analytics":
+                SimpleReport.generateCSV(googleConnector, reportConfig);
+                break;
+            case "livestream":
+                LivestreamReport.generateCSV(reportConfig);
+                break;
+            case "twitter":
+                TwitterReport.generateCSV(senatorData, reportConfig);
+                break;
+            case "facebook":
+                FacebookReport.generateCSV(senatorData, reportConfig);
+                break;
+            case "youtube":
+                YoutubeReport.generateCSV(senatorData, reportConfig);
+                break;
+            case "socialmedia":
+                SocialMediaReport.generateCSV(senatorData, reportConfig);
+                break;
+            default:
+                System.err.println("Unknown report type: " + reportType + "; skipping.");
+                break;
             }
         }
         ExcelReport.generateExcel(config);
         ExcelReportEmail.emailExcel(config);
 
         System.out.println("Done");
-
     }
-
 }

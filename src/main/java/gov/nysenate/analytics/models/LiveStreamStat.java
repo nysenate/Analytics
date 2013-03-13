@@ -1,4 +1,4 @@
-package gov.nysenate.analytics.structures;
+package gov.nysenate.analytics.models;
 
 public class LiveStreamStat
 {
