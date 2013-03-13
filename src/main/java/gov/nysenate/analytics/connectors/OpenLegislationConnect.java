@@ -9,7 +9,8 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class OpenLegislationConnect {
 
@@ -79,10 +80,11 @@ public class OpenLegislationConnect {
 		else { //it's a bill
 			//Pattern p = Pattern.compile("<h2>[A-Z]\\d{2,5}\\w?\\-\\d{1,4}:.*?</h2>");
 
-			InputStream content = new URL(BILL_URL + value + ".json").openStream();
-			JSONObject data = new JSONObject(new Scanner(content).useDelimiter("\\A").next());
+			InputStream contentStream = new URL(BILL_URL + value + ".json").openStream();
+			String contents = new Scanner(contentStream).useDelimiter("\\A").next();
 
-			String title = data.getJSONObject("response").getJSONArray("results").getJSONObject(0).getJSONObject("data").getJSONObject("bill").getString("title");
+			JsonNode data = new ObjectMapper().readValue(contents, JsonNode.class);
+			String title = data.get("response").get("results").get(0).get("data").get("bill").get("title").asText();
 			return title.replaceAll("\"", "");
 		}
 	}
