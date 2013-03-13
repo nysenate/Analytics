@@ -4,7 +4,6 @@ import gov.nysenate.analytics.connectors.GoogleAnalyticsConnect;
 import gov.nysenate.analytics.models.NYSenate;
 import gov.nysenate.analytics.reports.BillsReport;
 import gov.nysenate.analytics.reports.ExcelReport;
-import gov.nysenate.analytics.reports.ExcelReportEmail;
 import gov.nysenate.analytics.reports.FacebookReport;
 import gov.nysenate.analytics.reports.LivestreamReport;
 import gov.nysenate.analytics.reports.SenatorsReport;
@@ -155,8 +154,7 @@ public class Main
             }
         }
         ExcelReport.generateExcel(config);
-        ExcelReportEmail.emailExcel(config);
-
+        Utils.emailExcel(config);
         System.out.println("Done");
     }
 }
