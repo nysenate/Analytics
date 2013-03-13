@@ -1,11 +1,7 @@
 [service:analytics]
 user=
 pass=
-account_url=https://www.google.com/analytics/feeds/accounts/default
-data_url=https://www.google.com/analytics/feeds/data
 app_name=
-start_date = 
-end_date = 
 
 [report:twitter]
 report_type = twitter

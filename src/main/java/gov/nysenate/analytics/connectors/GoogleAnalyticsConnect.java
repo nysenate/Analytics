@@ -3,54 +3,52 @@ package gov.nysenate.analytics.connectors;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import org.ini4j.Profile.Section;
 
 import com.google.gdata.client.analytics.AnalyticsService;
 import com.google.gdata.client.analytics.DataQuery;
-import com.google.gdata.data.analytics.AccountFeed;
 import com.google.gdata.data.analytics.DataFeed;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
 public class GoogleAnalyticsConnect
 {
-    private final Section config;
+    private final URL dataURL;
     private final AnalyticsService as;
 
-    public GoogleAnalyticsConnect(Section config) throws AuthenticationException
+    /**
+     * 
+     * @param config
+     *            Required Keys: user, pass, app_name
+     * 
+     * @throws AuthenticationException
+     */
+    public GoogleAnalyticsConnect(Map<String, String> config) throws AuthenticationException
     {
-        this.config = config;
-        as = new AnalyticsService(config.get("app_name"));
-        as.setUserCredentials(config.get("user"), config.get("pass"));
+        this(config.get("user"), config.get("pass"), config.get("app_name"));
     }
 
-    public String getDateString(String date_type, Section params)
+    public GoogleAnalyticsConnect(String user, String pass, String appName) throws AuthenticationException
     {
-        return params.containsKey(date_type) ? params.get(date_type) : config.get(date_type);
-    }
+        this.as = new AnalyticsService(appName);
+        this.as.setUserCredentials(user, pass);
 
-    public AccountFeed getAccountFeed()
-    {
         try {
-            return as.getFeed(new URL(config.get("account_url")), AccountFeed.class);
+            this.dataURL = new URL("https://www.google.com/analytics/feeds/data");
         }
         catch (MalformedURLException e) {
-            System.err.println("Malformed URL: " + config.get("account_url"));
+            System.err.println("Malformed data url. This is hardcoded and shouldn't be possible.");
+            e.printStackTrace(System.err);
+            throw new RuntimeException(e);
         }
-        catch (IOException e) {
-            System.err.println("Network error trying to retrieve feed: " + e.getMessage());
-        }
-        catch (ServiceException e) {
-            System.err.println("Analytics API responded with an error message: " + e.getMessage());
-        }
-        return null;
     }
 
     public DataFeed getDataFeed(Section params)
     {
         try {
-            DataQuery query = new DataQuery(new URL(config.get("data_url")));
+            DataQuery query = new DataQuery(dataURL);
 
             if (params.get("max_results") != null)
                 query.setMaxResults(Integer.parseInt(params.get("max_results")));
@@ -58,8 +56,8 @@ public class GoogleAnalyticsConnect
                 query.setMaxResults(10000); // The max it can handle
 
             query.setIds("ga:" + params.get("id"));
-            query.setStartDate(this.getDateString("start_date", params));
-            query.setEndDate(this.getDateString("end_date", params));
+            query.setStartDate(params.get("end_date"));
+            query.setEndDate(params.get("start_date"));
 
             if (params.containsKey("dimensions"))
                 query.setDimensions(params.get("dimensions"));
@@ -72,9 +70,6 @@ public class GoogleAnalyticsConnect
 
             return as.getFeed(query, DataFeed.class);
 
-        }
-        catch (MalformedURLException e) {
-            System.err.println("Malformed URL: " + config.get("data_url"));
         }
         catch (IOException e) {
             System.err.println("Network error trying to retrieve feed: " + e.getMessage());
