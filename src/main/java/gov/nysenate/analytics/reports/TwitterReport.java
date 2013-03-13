@@ -1,10 +1,9 @@
 package gov.nysenate.analytics.reports;
 
-import gov.nysenate.analytics.structures.NYSenate;
+import gov.nysenate.analytics.CSVReport;
+import gov.nysenate.analytics.models.NYSenate;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -17,7 +16,7 @@ import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.TwitterException;
 import winterwell.jtwitter.User;
 
-public class TwitterReport
+public class TwitterReport extends CSVReport
 {
     public static boolean generateCSV(List<NYSenate> nySenateData, Section params)
     {
@@ -32,7 +31,7 @@ public class TwitterReport
                     )
                     );
 
-            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
+            BufferedWriter bw = getOutputWriter(params);
             bw.write("profileName,id,friends,followers,favorites,statuses,mentions,hashtags,created,website");
             bw.newLine();
 

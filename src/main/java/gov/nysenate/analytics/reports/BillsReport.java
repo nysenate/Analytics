@@ -1,13 +1,12 @@
 package gov.nysenate.analytics.reports;
 
+import gov.nysenate.analytics.CSVReport;
 import gov.nysenate.analytics.Utils;
 import gov.nysenate.analytics.connectors.GoogleAnalyticsConnect;
 import gov.nysenate.analytics.connectors.OpenLegislationConnect;
 import gov.nysenate.analytics.models.Source;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,16 +18,17 @@ import org.ini4j.Profile.Section;
 
 import com.google.gdata.data.analytics.DataEntry;
 
-public class BillsReport
+public class BillsReport extends CSVReport
 {
 
     public static boolean generateCSV(GoogleAnalyticsConnect gac, Section params)
     {
+
         try {
             ArrayList<String> topBills = new ArrayList<String>();
             Pattern p = Pattern.compile("[a-zA-Z][.-]?\\d{3,5}[.-]?[a-zA-Z]?\\-\\d{1,4}");
 
-            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
+            BufferedWriter bw = getOutputWriter(params);
             bw.write(params.get("column_headers"));
             bw.newLine();
 
@@ -47,7 +47,7 @@ public class BillsReport
                     List<Source> lst = Utils.combineDataFeedBySource(gac.getDataFeed(params).getEntries(), "/bill/");
                     Collections.sort(lst);
                     for (Source source : Utils.groupOthers(lst, Integer.parseInt(params.get("count")))) {
-                        bw.write(gac.getDateString("end_date", params) + ","
+                        bw.write(params.get("end_date") + ","
                                 + bill + ",\""
                                 + title + "\","
                                 + source.source + ","

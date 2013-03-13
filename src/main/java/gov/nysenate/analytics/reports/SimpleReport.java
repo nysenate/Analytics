@@ -1,11 +1,10 @@
 package gov.nysenate.analytics.reports;
 
+import gov.nysenate.analytics.CSVReport;
 import gov.nysenate.analytics.connectors.GoogleAnalyticsConnect;
 import gov.nysenate.analytics.connectors.OpenLegislationConnect;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,16 +15,16 @@ import com.google.gdata.data.analytics.DataEntry;
 import com.google.gdata.data.analytics.Dimension;
 import com.google.gdata.data.analytics.Metric;
 
-public class SimpleReport
+public class SimpleReport extends CSVReport
 {
     public static boolean generateCSV(GoogleAnalyticsConnect gac, Section params)
     {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
+            BufferedWriter bw = getOutputWriter(params);
             List<DataEntry> entries = gac.getDataFeed(params).getEntries();
 
             // Get a list of all the feed data columns from the first data entry
-            // This requires some ugly hacking becaues we've got some
+            // This requires some ugly hacking because we've got some
             // non-standard values and formats
             DataEntry firstEntry = entries.get(0);
             List<String> feedDataNames = new ArrayList<String>();
@@ -64,12 +63,11 @@ public class SimpleReport
             }
             bw.newLine();
 
-            // This needs to account for the hacks we made above for everything
-            // to work out.
+            // This needs to account for the hacks we made above for everything to work out.
             for (DataEntry entry : entries) {
                 for (String dataName : feedDataNames) {
                     if (dataName == "date") // Different than ga:data
-                        bw.write(gac.getDateString("end_date", params) + ",");
+                        bw.write(params.get("end_date") + ",");
                     else if (dataName == header)
                         bw.write("\"" + OpenLegislationConnect.get(entry.stringValueOf("ga:pagePath")) + "\",");
                     else

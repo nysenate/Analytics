@@ -1,9 +1,9 @@
 package gov.nysenate.analytics.reports;
 
+import gov.nysenate.analytics.CSVReport;
+
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -17,7 +17,7 @@ import org.ini4j.Profile.Section;
 import com.livestream.api.generated.Channel;
 import com.livestream.api.generated.Rss;
 
-public class LivestreamReport
+public class LivestreamReport extends CSVReport
 {
     public static final String apiUrlStart = "http://x";
     public static final String apiUrlEnd = "x.channel-api.livestream-api.com/2.0/info";
@@ -28,7 +28,8 @@ public class LivestreamReport
             JAXBContext jc = JAXBContext.newInstance("com.livestream.api.generated");
 
             // Get the file started with a simple header
-            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
+
+            BufferedWriter bw = getOutputWriter(params);
             bw.write("Date,Channel,Minutes this Month,Total Minutes");
             bw.newLine();
 

@@ -1,12 +1,12 @@
 package gov.nysenate.analytics.reports;
 
+import gov.nysenate.analytics.CSVReport;
 import gov.nysenate.analytics.Utils;
 import gov.nysenate.analytics.models.NYSenate;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.text.SimpleDateFormat;
@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.ini4j.Profile.Section;
 
-public class YoutubeReport
+public class YoutubeReport extends CSVReport
 {
     public static boolean generateCSV(List<NYSenate> nySenateData, Section params)
     {
@@ -28,7 +28,7 @@ public class YoutubeReport
         try {
 
             String webLine;
-            BufferedWriter bw = new BufferedWriter(new FileWriter(params.get("output_file")));
+            BufferedWriter bw = getOutputWriter(params);
             bw.write("Date,Channel,Videos,Lifetime ChannelViews,Subscribers,Top Viewed,Views to Date\n");
             String totalVideo = "0";
             String lifetimeViews = "0";

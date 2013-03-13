@@ -1,13 +1,12 @@
 package gov.nysenate.analytics.reports;
 
+import gov.nysenate.analytics.CSVReport;
 import gov.nysenate.analytics.Utils;
 import gov.nysenate.analytics.connectors.GoogleAnalyticsConnect;
 import gov.nysenate.analytics.models.NYSenate;
 import gov.nysenate.analytics.models.Source;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -16,12 +15,12 @@ import org.ini4j.Profile.Section;
 
 import com.google.gdata.data.analytics.DataFeed;
 
-public class SenatorsReport
+public class SenatorsReport extends CSVReport
 {
     public static boolean generateCSV(GoogleAnalyticsConnect gac, List<NYSenate> senators, Section params)
     {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(params.get("output_file"))));
+            BufferedWriter bw = getOutputWriter(params);
             for (NYSenate senator : senators) {
                 if (senator.fName.equals("NYSenate"))
                     continue;
