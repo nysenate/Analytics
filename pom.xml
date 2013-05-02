@@ -55,7 +55,6 @@
 			<groupId>oauth.signpost</groupId>
 			<artifactId>oauth-signpost</artifactId>
 			<version>1.2.1.2</version>
-			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>
@@ -86,6 +85,11 @@
 			<groupId>com.google.gdata</groupId>
 			<artifactId>core</artifactId>
 			<version>1.47.1</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.3</version>
 		</dependency>
 	</dependencies>
 </project>

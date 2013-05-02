@@ -10,3 +10,4 @@ function mvn_install {
 
 mvn_install org.winterwell      jtwitter                2.8.2     $lib_dir/jtwitter.jar
 mvn_install com.livestream.api  livestream-api-v2       1.0     $lib_dir/livestream-api-v2.jar
+mvn_install oauth.signpost      oauth-signpost          1.2.1.2 $lib_dir/signpost-core-1.2.1.2.jar
