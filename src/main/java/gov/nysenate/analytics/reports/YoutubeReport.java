@@ -4,7 +4,6 @@ import gov.nysenate.analytics.Utils;
 import gov.nysenate.analytics.models.NYSenate;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -13,6 +12,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.ini4j.Profile.Section;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 public class YoutubeReport extends CSVReport
 {
@@ -27,8 +28,8 @@ public class YoutubeReport extends CSVReport
         try {
 
             String webLine;
-            BufferedWriter bw = getOutputWriter(params);
-            bw.write("Date,Channel,Videos,Lifetime ChannelViews,Subscribers,Top Viewed,Views to Date\n");
+            CSVWriter writer = getCSVWriter(params);
+            writer.writeNext("Date,Channel,Videos,Lifetime Channel Views,Subscribers,Top Viewed Video,Views to Date".split(","));
             String totalVideo = "0";
             String lifetimeViews = "0";
             String subscribers = "0";
@@ -49,9 +50,7 @@ public class YoutubeReport extends CSVReport
                         continue;
 
                     System.out.println("  " + temp.youtubeURL);
-                    BufferedReader br = Utils.getURLWithQueryStringReader(temp.youtubeURL.concat("/videos?sort=p&flow=list&page=1&view=0"));// append
-                                                                                                                                            // sorting
-                                                                                                                                            // option
+                    BufferedReader br = Utils.getURLWithQueryStringReader(temp.youtubeURL.concat("/videos?sort=p&flow=list&page=1&view=0"));
 
                     boolean isStatRead = false;
                     boolean isFeedItemFound = false;
@@ -109,9 +108,7 @@ public class YoutubeReport extends CSVReport
 
                     // process top video buffered data
                     String topVideoData = topVideoBuffer.toString();
-                    System.out.println(topVideoData);
                     if (isFeedItemFound && topVideoData.contains("feed-video-title")) {
-
                         topVideo = topVideoData.substring(topVideoData.indexOf("<h4>"), topVideoData.indexOf("</h4>"));
                         topVideo = topVideo.substring(topVideo.indexOf(">", 5) + 1, topVideo.indexOf("</")).trim();
                     }
@@ -128,18 +125,15 @@ public class YoutubeReport extends CSVReport
 
                     // today's Date,Channel/first name,Videos,Lifetime
                     // ChannelViews,Subscribers,Top Viewed,Views to Date
-                    bw.write(
-                            today + ","
-                                    + ((temp.fName != null) ? temp.fName : "") + ","
-                                    + totalVideo + ","
-                                    + lifetimeViews + ","
-                                    + subscribers + ","
-                                    + topVideo + ","
-                                    + topVideoViews
-
-                            );
-                    bw.newLine();
-
+                    writer.writeNext(new String[] {
+                            today,
+                            ((temp.fName != null) ? temp.fName : ""),
+                            totalVideo,
+                            lifetimeViews,
+                            subscribers,
+                            topVideo,
+                            topVideoViews
+                    });
                 }
                 catch (FileNotFoundException e) {
                     System.out.println("BAD URL [not found]: " + temp.youtubeURL);
@@ -148,7 +142,7 @@ public class YoutubeReport extends CSVReport
                     System.out.println("BAD URL [too many redirects]: " + temp.youtubeURL);
                 }
             }
-            bw.close();
+            writer.close();
             return true;
         }
         catch (IOException e) {

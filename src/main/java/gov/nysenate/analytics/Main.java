@@ -122,7 +122,8 @@ public class Main
             }
 
             String reportType = reportConfig.get("report_type");
-            System.out.println("Processing: " + reportType + " report.");
+
+            System.out.println("Processing: " + reportType + " " + entry.getKey());
             switch (reportType) {
             case "senators":
                 SenatorsReport.generateCSV(googleConnector, senatorData, reportConfig);

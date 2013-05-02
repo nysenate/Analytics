@@ -1,77 +1,75 @@
 package gov.nysenate.analytics.reports;
 
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.ProtocolException;
 import java.net.URL;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.UnmarshalException;
+import javax.xml.bind.Unmarshaller;
 
 import org.ini4j.Profile.Section;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 import com.livestream.api.generated.Channel;
 import com.livestream.api.generated.Rss;
 
+/**
+ * Handles reports with `report_type=livestream` and writes them to the `output_file` as
+ * a CSV file in the following format:
+ * 
+ * > Date,Channel,Viewer Minutes this Month,Total Viewer Minutes,URL
+ * > ...
+ * > ...
+ * > ,Total,#month,#alltime
+ * 
+ * Channels to report are stored as a comma separated list in the `channels` parameter.
+ * 
+ * @author GraylinKim
+ * 
+ */
 public class LivestreamReport extends CSVReport
 {
     public static final String apiUrlStart = "http://x";
     public static final String apiUrlEnd = "x.channel-api.livestream-api.com/2.0/info";
 
-    public static boolean generateCSV(Section params)
+    public static void generateCSV(Section params) throws IOException
     {
+        int monthTotal = 0, allTimeTotal = 0;
+        CSVWriter writer = getCSVWriter(params);
+        writer.writeNext("Date,Channel,Viewer Minutes this Month,Total Viewer Minutes,URL".split(","));
         try {
-            JAXBContext jc = JAXBContext.newInstance("com.livestream.api.generated");
-
-            // Get the file started with a simple header
-
-            BufferedWriter bw = getOutputWriter(params);
-            bw.write("Date,Channel,Minutes this Month,Total Minutes");
-            bw.newLine();
-
-            int monthTotal = 0, allTimeTotal = 0;
+            Unmarshaller jcm = JAXBContext.newInstance("com.livestream.api.generated").createUnmarshaller();
             for (String channelName : params.get("channels").split(",")) {
                 try {
                     URL url = new URL(apiUrlStart + channelName + apiUrlEnd);
                     System.out.println(url);
 
-                    Channel channel = ((Rss) jc.createUnmarshaller().unmarshal(url)).getChannel();
+                    Channel channel = ((Rss) jcm.unmarshal(url)).getChannel();
                     monthTotal += channel.getViewerMinutesThisMonth();
                     allTimeTotal += channel.getTotalViewerMinutes();
-
-                    bw.write(
-                            params.get("end_date") + ","
-                                    + channel.getTitle().replaceAll(",", " ") + ","
-                                    + channel.getViewerMinutesThisMonth() + ","
-                                    + channel.getTotalViewerMinutes()
-                            );
-                    bw.newLine();
+                    writer.writeNext(new String[] {
+                            params.get("end_date"),
+                            channel.getTitle().replaceAll(",", " "),
+                            String.valueOf(channel.getViewerMinutesThisMonth()),
+                            String.valueOf(channel.getTotalViewerMinutes()),
+                            channel.getLink()
+                    });
                 }
-                catch (FileNotFoundException e) {
-                    System.out.println("BAD URL [not found]: " + apiUrlStart + channelName + apiUrlEnd);
-                }
-                catch (ProtocolException e) {
-                    System.out.println("BAD URL [too many redirects]: " + apiUrlStart + channelName + apiUrlEnd);
-                }
-                catch (UnmarshalException e) {
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                catch (IOException | JAXBException e) {
+                    System.err.println("Unable to retrieve data for " + channelName + " :" + e.getMessage());
+                    e.printStackTrace(System.err);
                 }
             }
-            bw.write("\n,Total," + monthTotal + "," + allTimeTotal);
-            bw.close();
-            return true;
         }
         catch (JAXBException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println("Unable to create JAXB context: " + e.getMessage());
+            e.printStackTrace(System.err);
         }
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        finally {
+            writer.writeNext(new String[] {});
+            writer.writeNext((",Total," + monthTotal + "," + allTimeTotal).split(","));
+            writer.close();
         }
-        return false;
     }
 }

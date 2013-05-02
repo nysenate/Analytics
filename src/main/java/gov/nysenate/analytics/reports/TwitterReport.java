@@ -2,7 +2,6 @@ package gov.nysenate.analytics.reports;
 
 import gov.nysenate.analytics.models.NYSenate;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -14,6 +13,7 @@ import winterwell.jtwitter.Status;
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.TwitterException;
 import winterwell.jtwitter.User;
+import au.com.bytecode.opencsv.CSVWriter;
 
 public class TwitterReport extends CSVReport
 {
@@ -30,9 +30,8 @@ public class TwitterReport extends CSVReport
                     )
                     );
 
-            BufferedWriter bw = getOutputWriter(params);
-            bw.write("profileName,id,friends,followers,favorites,statuses,mentions,hashtags,created,website");
-            bw.newLine();
+            CSVWriter writer = getCSVWriter(params);
+            writer.writeNext("profileName,id,friends,followers,favorites,statuses,mentions,hashtags,created,website".split(","));
 
             for (NYSenate senator : nySenateData) {
                 try {
@@ -47,26 +46,25 @@ public class TwitterReport extends CSVReport
                         // This can sometimes be null
                         URI website = twitterUser.getWebsite();
 
-                        bw.write(
-                                profileName + "," +
-                                        twitterUser.getId() + "," +
-                                        twitterUser.getFriendsCount() + "," +
-                                        twitterUser.getFollowersCount() + "," +
-                                        twitterUser.getFavoritesCount() + "," +
-                                        twitterUser.getStatusesCount() + "," +
-                                        mentions.size() + "," +
-                                        hashtags.size() + "," +
-                                        twitterUser.getCreatedAt() + "," +
-                                        ((website == null) ? "" : website.toString())
-                                );
-                        bw.newLine();
+                        writer.writeNext(new String[] {
+                                profileName,
+                                String.valueOf(twitterUser.getId()),
+                                String.valueOf(twitterUser.getFriendsCount()),
+                                String.valueOf(twitterUser.getFollowersCount()),
+                                String.valueOf(twitterUser.getFavoritesCount()),
+                                String.valueOf(twitterUser.getStatusesCount()),
+                                String.valueOf(mentions.size()),
+                                String.valueOf(hashtags.size()),
+                                twitterUser.getCreatedAt().toString(),
+                                ((website == null) ? "" : website.toString())
+                        });
                     }
                 }
                 catch (TwitterException e) {
                     System.out.println("  Twitter Error: " + e.getMessage());
                 }
             }
-            bw.close();
+            writer.close();
             return true;
         }
         catch (IOException e) {
@@ -74,5 +72,4 @@ public class TwitterReport extends CSVReport
         }
         return false;
     }
-
 } // class TwitterReport

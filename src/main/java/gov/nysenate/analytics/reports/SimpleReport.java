@@ -3,23 +3,36 @@ package gov.nysenate.analytics.reports;
 import gov.nysenate.analytics.connectors.GoogleAnalyticsConnect;
 import gov.nysenate.analytics.connectors.OpenLegislationConnect;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.ini4j.Profile.Section;
 
+import au.com.bytecode.opencsv.CSVWriter;
+
 import com.google.gdata.data.analytics.DataEntry;
 import com.google.gdata.data.analytics.Dimension;
 import com.google.gdata.data.analytics.Metric;
 
+/**
+ * Handles reports with `report_type=simple_analytics` and writes them to the `output_file` as
+ * a CSV file in a simple header followed by data format. The data included is determined from
+ * the results of the GoogleAnalytics query performed. The header is derived from the available
+ * dimension and metric names.
+ * 
+ * See GoogleAnalyticsConnect for information on configuring your queries.
+ * 
+ * @author GraylinKim
+ * 
+ */
 public class SimpleReport extends CSVReport
 {
-    public static boolean generateCSV(GoogleAnalyticsConnect gac, Section params)
+    public static void generateCSV(GoogleAnalyticsConnect gac, Section params) throws IOException
     {
+        CSVWriter writer = getCSVWriter(params);
         try {
-            BufferedWriter bw = getOutputWriter(params);
+
             List<DataEntry> entries = gac.getDataFeed(params).getEntries();
 
             // Get a list of all the feed data columns from the first data entry
@@ -56,35 +69,35 @@ public class SimpleReport extends CSVReport
                 feedDataNames.add(metric.getName());
 
             // Write out the header columns with proper casing
+            ArrayList<String> values = new ArrayList<String>();
             for (String dataName : feedDataNames) {
                 String cleaned = dataName.replace("ga:", "");
-                bw.write(cleaned.substring(0, 1).toUpperCase() + cleaned.substring(1) + ",");
+                values.add(cleaned.substring(0, 1).toUpperCase() + cleaned.substring(1));
             }
-            bw.newLine();
+            writer.writeNext(values.toArray(new String[] {}));
 
             // This needs to account for the hacks we made above for everything to work out.
+
             for (DataEntry entry : entries) {
+                values.clear();
                 for (String dataName : feedDataNames) {
                     if (dataName == "date") // Different than ga:data
-                        bw.write(params.get("end_date") + ",");
+                        values.add(params.get("end_date"));
                     else if (dataName == header)
-                        bw.write("\"" + OpenLegislationConnect.get(entry.stringValueOf("ga:pagePath")) + "\",");
+                        values.add(OpenLegislationConnect.get(entry.stringValueOf("ga:pagePath")));
                     else
-                        bw.write("\"" + entry.stringValueOf(dataName) + "\",");
+                        values.add(entry.stringValueOf(dataName));
                 }
-                bw.newLine();
+                writer.writeNext(values.toArray(new String[] {}));
             }
-            bw.newLine();
-            bw.close();
-        }
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+
         }
         catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return false;
+        finally {
+            writer.close();
+        }
     }
 }

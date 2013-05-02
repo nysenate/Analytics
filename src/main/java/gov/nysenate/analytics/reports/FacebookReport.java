@@ -2,16 +2,17 @@ package gov.nysenate.analytics.reports;
 
 import gov.nysenate.analytics.models.NYSenate;
 
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.ProtocolException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.ini4j.Profile.Section;
 
-import com.restfb.Connection;
+import au.com.bytecode.opencsv.CSVWriter;
+
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.FacebookClient.AccessToken;
@@ -19,113 +20,111 @@ import com.restfb.types.Page;
 import com.restfb.types.User;
 
 /**
+ * Handles reports with `report_type=facebook` and writes them to the `output_file` as
+ * a CSV file in the following format:
  * 
- * @author aaakulkarni
+ * > Date,First Name,Last Name,URL,Fans
+ * > ...
+ * > ...
+ * 
+ * Uses the Facebook API authenticated with the `app_key` and the `app_secret` values from
+ * the configuration file to retrieve the data.
+ * 
+ * @author aaakulkarni, GraylinKim
  * 
  */
-public class FacebookReport
+public class FacebookReport extends CSVReport
 {
-    /**
-     * 
-     * @param nySenateData
-     * @param params
-     * @return
-     */
-    public static boolean generateCSV(List<NYSenate> nySenateData, Section params)
+    public static Pattern userPattern = Pattern.compile("(?:https?://)?(?:www\\.)?facebook.com/.*?([-._\\w]+)(\\?.*)?$", Pattern.CASE_INSENSITIVE);
+
+    public static void generateCSV(List<NYSenate> nySenateData, Section params) throws IOException
     {
-        try {
-            DefaultFacebookClient client = new DefaultFacebookClient();
-            AccessToken accessToken = client.obtainAppAccessToken("471573169552684", "a2dc234abf47c4ce930a4d3cb5d2b017");
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        CSVWriter writer = getCSVWriter(params);
+        writer.writeNext("Date,First Name,Last Name,Account Type,Fans,URL,".split(","));
 
-            FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
-            BufferedWriter bw = new BufferedWriter(new FileWriter(params.get("output_file")));
-            bw.write("Date,First,Last,URL,Fans\n");
-            for (NYSenate temp : nySenateData) {
+        DefaultFacebookClient client = new DefaultFacebookClient();
+        AccessToken accessToken = client.obtainAppAccessToken("471573169552684", "a2dc234abf47c4ce930a4d3cb5d2b017");
+        FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+
+        for (NYSenate senateObject : nySenateData) {
+            String url = senateObject.facebookURL;
+            if (url == null || url.isEmpty())
+                continue;
+
+            Exception exception = null;
+            String facebook_id = "";
+            String account_type = "unknown";
+            String popularity = "unavailable";
+            Matcher userMatcher = userPattern.matcher(url);
+
+            if (!userMatcher.find()) {
+                System.err.println("  BAD URL: " + url);
+            }
+            else {
+                facebook_id = userMatcher.group(1);
+                System.out.println("  Fetching: facebook.com/" + facebook_id);
+
                 try {
-                    if (temp.facebookURL == null)
-                        continue;
-
-                    String pName = "";
-                    String partialFBURL = temp.facebookURL.substring(temp.facebookURL.indexOf(".com/"));
-                    String[] facebookURLArray = partialFBURL.split("/");
-
-                    if (facebookURLArray.length == 4) {
-                        pName = facebookURLArray[3];
+                    // See if we have a page url. It is important not to confirm account type until
+                    // after verifying that we have access to likes. For some reason facebook will
+                    // return a bastardized Page object even when requesting users.
+                    Page page = facebookClient.fetchObject(facebook_id, Page.class);
+                    if (page != null) {
+                        popularity = page.getLikes().toString();
+                        account_type = "page";
                     }
-                    else if (facebookURLArray.length == 2) {
-                        pName = facebookURLArray[1];
-                    }
-                    if (pName.indexOf("?") > 0)
-                        pName = pName.substring(0, pName.indexOf("?"));
+                }
+                catch (Exception e) {
+                    exception = e;
+                }
 
-                    System.out.println("accountlocation:: facebook.com/" + pName);
-                    Page page = null;
-                    String count = "Non-public";
+                if (!account_type.equals("page")) {
                     try {
-                        System.out.println("read as page:: ");
-                        page = facebookClient.fetchObject(pName, Page.class);
-                        if (null != page) {
-                            count = page.getLikes().toString();
+                        // If it turned out the url wasn't to a page it must be a person. This is
+                        // where we start running into issues with the Senator's privacy settings.
+                        // Because the app doesn't make requests on behalf of a Facebook user it
+                        // treats us as if we are logged out of their web app. Many senator user
+                        // accounts are open only to Facebook members and not to the public.
+                        User user = facebookClient.fetchObject(facebook_id, User.class);
+                        if (user != null) {
+                            account_type = "user";
+                            if (user.getMetadata() != null && user.getMetadata().getConnections() != null) {
+                                popularity = user.getMetadata().getConnections().getFriends();
+                            }
                         }
                     }
                     catch (Exception e) {
-                        count = "nonPublicPage";
+                        exception = e;
                     }
-
-                    try {
-                        if ("Non-public".equalsIgnoreCase(count) || "nonPublicPage".equalsIgnoreCase(count)) {
-                            System.out.println("read as User:: ");
-                            User user = facebookClient.fetchObject(pName, User.class);
-                            if (user != null && user.getMetadata() != null && null != user.getMetadata().getConnections() && null != user.getMetadata().getConnections().getFriends()) {
-                                count = user.getMetadata().getConnections().getFriends();
-                            }
-                            else {
-                                Connection<User> myFriends = null;
-                                try {
-                                    myFriends = facebookClient.fetchConnection(pName.concat("/friends"), User.class);
-                                }
-                                catch (Exception e) {
-                                }
-
-                                if (null != myFriends) {
-                                    count = Integer.toString(myFriends.getData().size());
-                                }
-                                else {
-                                    System.out.println(user);
-                                    count = "Non-public";
-                                }
-                            }
-                        }
-
-                    }
-                    catch (Exception e) {
-                        count = "Not-exist";
-                    }
-
-                    System.out.println("final count " + count);
-                    bw.write(
-                            params.get("end_date") + ","
-                                    + ((temp.fName != null) ? temp.fName : "") + ","
-                                    + ((temp.lName != null) ? temp.lName : "") + ","
-                                    + ((temp.facebookURL != null) ? temp.facebookURL : "") + ","
-                                    + count
-                            );
-                    bw.newLine();
-
-                }
-                catch (FileNotFoundException e) {
-                    System.out.println("BAD URL [not found]: " + temp.facebookURL);
-                }
-                catch (ProtocolException e) {
-                    System.out.println("BAD URL [too many redirects]: " + temp.facebookURL);
                 }
             }
-            bw.close();
-            return true;
+
+            if (account_type.equalsIgnoreCase("unknown")) {
+                // If the user hasn't been identified with either account type then we're not
+                // sure what is going on. Either the account doesn't actually exist or the privacy
+                // settings are turned up so high that we can't tell via public access.
+                System.out.println("    Error: unable to fetch data for - " + url);
+                if (exception != null) {
+                    exception.printStackTrace(System.out);
+                }
+            }
+            else if (popularity.isEmpty()) {
+                // If we have an account type but no popularity measure then it means that the
+                // privacy settings have hidden it from us
+                System.out.println("    Non-public user - " + url);
+                popularity = "nonpublic";
+            }
+
+            writer.writeNext(new String[] {
+                    currentDate,
+                    ((senateObject.fName != null) ? senateObject.fName : ""),
+                    ((senateObject.lName != null) ? senateObject.lName : ""),
+                    account_type,
+                    popularity,
+                    ((senateObject.facebookURL != null) ? senateObject.facebookURL : "")
+            });
         }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+        writer.close();
     }
 }

@@ -24,14 +24,4 @@ public class NYSenate
                 + ((facebookURL != null) ? "\n---->" + facebookURL + ",Fans " + ((friends != null) ? friends : "") : "")
                 + ((flickrURL != null) ? "\n---->" + flickrURL : "");
     }
-
-    public String toAnalyticsString()
-    {
-        return ((fName != null) ? fName : "")
-                + ((lName != null) ? "," + lName : ",")
-                + ((twitterURL != null) ? "," + twitterURL : ",")
-                + ((youtubeURL != null) ? "," + youtubeURL : ",")
-                + ((facebookURL != null) ? "," + facebookURL : ",")
-                + ((flickrURL != null) ? "," + flickrURL : ",");
-    }
 }

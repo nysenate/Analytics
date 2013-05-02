@@ -82,7 +82,9 @@ public class OpenLegislationConnect
                // Pattern.compile("<h2>[A-Z]\\d{2,5}\\w?\\-\\d{1,4}:.*?</h2>");
 
             InputStream contentStream = new URL(BILL_URL + value + ".json").openStream();
-            String contents = new Scanner(contentStream).useDelimiter("\\A").next();
+            Scanner contentScanner = new Scanner(contentStream);
+            String contents = contentScanner.useDelimiter("\\A").next();
+            contentScanner.close();
 
             JsonNode data = new ObjectMapper().readValue(contents, JsonNode.class);
             String title = data.get("response").get("results").get(0).get("data").get("bill").get("title").asText();
