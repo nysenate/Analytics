@@ -20,11 +20,11 @@ public class SocialMediaReport extends CSVReport
                 writer.writeNext(new String[] {
                         params.get("end_date"),
                         ((temp.fName != null) ? temp.fName : ""),
-                        ((temp.lName != null) ? "," + temp.lName : ","),
-                        ((temp.twitterURL != null) ? "," + temp.twitterURL : ","),
-                        ((temp.youtubeURL != null) ? "," + temp.youtubeURL : ","),
-                        ((temp.facebookURL != null) ? "," + temp.facebookURL : ","),
-                        ((temp.flickrURL != null) ? "," + temp.flickrURL : ",")
+                        ((temp.lName != null) ? temp.lName : ""),
+                        ((temp.twitterURL != null) ? temp.twitterURL : ""),
+                        ((temp.youtubeURL != null) ? temp.youtubeURL : ""),
+                        ((temp.facebookURL != null) ? temp.facebookURL : ""),
+                        ((temp.flickrURL != null) ? temp.flickrURL : "")
                 });
             }
             writer.close();
