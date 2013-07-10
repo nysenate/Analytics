@@ -2,8 +2,8 @@
 
 source $(dirname "$0")/utils.sh
 
-startdate=`date -d "-1 month -$(($(date +%d)-1)) days" +"%Y-%m-%d"`
-enddate=`date -d "-$(date +%d) days" +"%Y-%m-%d"`
+startdate=`date -d "-1 month -$(($(date +%e)-1)) days" +"%Y-%m-%d"`
+enddate=`date -d "-$(date +%e) days" +"%Y-%m-%d"`
 
 if [ -z "$1" ]; then
    echo "Ini file required."
