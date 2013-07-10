@@ -135,6 +135,6 @@ public class OpenLegislationConnect
             e.printStackTrace();
         }
 
-        return null;
+        return "";
     }
 }
