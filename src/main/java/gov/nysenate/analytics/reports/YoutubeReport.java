@@ -30,11 +30,6 @@ public class YoutubeReport extends CSVReport
             String webLine;
             CSVWriter writer = getCSVWriter(params);
             writer.writeNext("Date,Channel,Videos,Lifetime Channel Views,Subscribers,Top Viewed Video,Views to Date".split(","));
-            String totalVideo = "0";
-            String lifetimeViews = "0";
-            String subscribers = "0";
-            String topVideo = "";
-            String topVideoViews = "";
 
             // Get today's date
             Date date = new Date();
@@ -44,6 +39,12 @@ public class YoutubeReport extends CSVReport
             String today = formatter.format(date);
 
             for (NYSenate temp : nySenateData) {
+                String totalVideo = "0";
+                String lifetimeViews = "0";
+                String subscribers = "0";
+                String topVideo = "";
+                String topVideoViews = "";
+
                 try {
                     if (temp.youtubeURL == null || !("NYSenate".equalsIgnoreCase(temp.fName) || "NYSenateUncut".equalsIgnoreCase(temp.fName)))
 

@@ -104,7 +104,8 @@ public class ExcelReport
         refInfo.add(new String[] { "Facebook Stats", "Snapshot when statistics are generated", "Shows number of fans for the Facebook sites linked to from the Senators' NYSenate.gov websites" });
         refInfo.add(new String[] { "Twitter Stats", "Snapshot when statistics are generated", "Provides statistics for the Twitter account linked to from the Senators' NYSenate.gov websites" });
         refInfo.add(new String[] { "Livestream Stats", "Current month / All Time", "Shows current month and all time viewing minutes for the Senate's channels on Livestream.com" });
-        refInfo.add(new String[] { "YouTube Stats", "Snapshot / All Time Shows", "Shows statistics for the Senate's two YouTube channels: NYSenate and NYSenateUnCut" });
+        // refInfo.add(new String[] { "YouTube Stats", "Snapshot / All Time Shows",
+        // "Shows statistics for the Senate's two YouTube channels: NYSenate and NYSenateUnCut" });
 
         CreationHelper helper = wb.getCreationHelper();
         for (int r = 0; r < refInfo.size(); r++) {
@@ -136,7 +137,7 @@ public class ExcelReport
         wb.setSheetOrder("Facebook Stats", 12);
         wb.setSheetOrder("Twitter Stats", 13);
         wb.setSheetOrder("Livestream Stats", 14);
-        wb.setSheetOrder("Youtube Stats", 15);
+        // wb.setSheetOrder("Youtube Stats", 15);
     }
 
     public static String getFileName()
