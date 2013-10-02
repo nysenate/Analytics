@@ -31,7 +31,7 @@ import com.livestream.api.generated.Rss;
 public class LivestreamReport extends CSVReport
 {
     public static final String apiUrlStart = "http://x";
-    public static final String apiUrlEnd = "x.channel-api.livestream-api.com/2.0/info";
+    public static final String apiUrlEnd = "x.api.channel.livestream.com/2.0/info.xml";
 
     public static void generateCSV(Section params) throws IOException
     {
