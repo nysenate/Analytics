@@ -95,6 +95,10 @@ public class Utils
                     tSObj = new NYSenate();
                     tSObj.nysenateURL = senM.group(1);
                 }
+                if (senM.group(2).startsWith("Senate District")) {
+                    tSObj = null;
+                    continue;
+                }
                 String strings[] = senM.group(2).split(",");
 
                 strings[1] = strings[1].trim();
