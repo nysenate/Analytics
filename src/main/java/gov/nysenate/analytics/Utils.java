@@ -212,49 +212,18 @@ public class Utils
 
     public static NYSenate fixForNYSenateGov(NYSenate senator)
     {
-        if (senator.lName.equals("Alesi")) {
-            senator.twitterURL = "http://twitter.com/senatoralesi";
-
-        }
-        else if (senator.lName.equals("Bonacic")) {
+        if (senator.lName.equals("Bonacic")) {
             senator.twitterURL = "http://twitter.com/johnbonacic";
             senator.facebookURL = "http://www.facebook.com/JohnBonacic";
-
-        }
-        else if (senator.lName.equals("Fuschillo")) {
-            senator.twitterURL = "http://twitter.com/SenFuschillo";
-            senator.facebookURL = "http://www.facebook.com/senatorfuschillo";
-
         }
         else if (senator.lName.equals("Hannon")) {
             senator.nysenateURL = "/senator/kemp-hannon";
-
         }
         else if (senator.lName.equals("Lanza")) {
             senator.twitterURL = "http://twitter.com/senatorlanza";
-
-        }
-        else if (senator.lName.equals("Oppenheimer")) {
-            senator.twitterURL = "http://twitter.com/SenatorSuzi";
-
-        }
-        else if (senator.lName.equals("Rivera")) {
-            senator.twitterURL = "http://twitter.com/NYSenatorRivera";
-
-        }
-        else if (senator.lName.equals("Savino")) {
-            senator.twitterURL = "http://twitter.com/dianesavino";
-
-        }
-        else if (senator.lName.equals("Valesky")) {
-            senator.twitterURL = "http://twitter.com/SenDavidValesky";
-
         }
         else if (senator.lName.equals("Young")) {
             senator.twitterURL = "http://twitter.com/SenatorYoung";
-        }
-        else if (senator.lName.equals("Gallivan")) {
-            senator.facebookURL = "https://www.facebook.com/pages/Senatorgallivan/199526826726545";
         }
         return senator;
     }
