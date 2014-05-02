@@ -212,18 +212,8 @@ public class Utils
 
     public static NYSenate fixForNYSenateGov(NYSenate senator)
     {
-        if (senator.lName.equals("Bonacic")) {
-            senator.twitterURL = "http://twitter.com/johnbonacic";
-            senator.facebookURL = "http://www.facebook.com/JohnBonacic";
-        }
-        else if (senator.lName.equals("Hannon")) {
+        if (senator.lName.equals("Hannon")) {
             senator.nysenateURL = "/senator/kemp-hannon";
-        }
-        else if (senator.lName.equals("Lanza")) {
-            senator.twitterURL = "http://twitter.com/senatorlanza";
-        }
-        else if (senator.lName.equals("Young")) {
-            senator.twitterURL = "http://twitter.com/SenatorYoung";
         }
         return senator;
     }
