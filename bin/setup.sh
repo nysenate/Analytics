@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
-
-root_dir=`dirname $0`/../
+script_dir=`dirname $0`
+root_dir=`cd $script_dir/..; echo $PWD`
 lib_dir=$root_dir/lib
 
 function mvn_install {
