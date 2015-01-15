@@ -86,6 +86,7 @@ public class Utils
 
     String in, s;
     NYSenate tSObj = null;
+
     while ((in = br.readLine()) != null) {
       Matcher senM = senPattern.matcher(in);
       Matcher facebookM = facebookPattern.matcher(in);
@@ -102,14 +103,17 @@ public class Utils
           tSObj = null;
           continue;
         }
-        String strings[] = senM.group(2).split(",");
 
-        strings[1] = strings[1].trim();
-        strings[0] = strings[0].trim();
-
-        tSObj.fName = strings[1];
-        tSObj.lName = strings[0];
+        String[] name_parts = senM.group(2).split(",");
+        tSObj.lName = name_parts[0].trim();
+        if (name_parts.length < 2) {
+          tSObj.fName = "Senator";
+        }
+        else {
+          tSObj.fName = name_parts[1].trim();
+        }
       }
+
       if (in.contains("social_buttons") && tSObj != null) {
         if (facebookM.find()) {
           s = in.substring(facebookM.start());
@@ -126,7 +130,6 @@ public class Utils
           s = in.substring(twitterM.start());
           s = s.split("\"")[0];
           tSObj.twitterURL = s;
-
         }
         if (youtubeM.find()) {
           s = in.substring(youtubeM.start());
@@ -136,7 +139,6 @@ public class Utils
         ret.add(fixForNYSenateGov(tSObj));
         tSObj = null;
       }
-
     }
 
     // Add special case for NYSenate.
