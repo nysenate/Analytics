@@ -1,10 +1,17 @@
 package gov.nysenate.analytics.connectors;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.List;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import org.ini4j.Profile.Section;
 
 import com.google.gdata.client.analytics.AnalyticsService;
@@ -18,25 +25,21 @@ public class GoogleAnalyticsConnect
     private final URL dataURL;
     private final AnalyticsService as;
 
-    /**
-     * 
-     * @param config
-     *            Required Keys: user, pass, app_name
-     * 
-     * @throws AuthenticationException
-     */
-    public GoogleAnalyticsConnect(Map<String, String> config) throws AuthenticationException
-    {
-        this(config.get("user"), config.get("pass"), config.get("app_name"));
-    }
+    private static final String analyticsUrl = "https://www.google.com/analytics/feeds/data";
 
-    public GoogleAnalyticsConnect(String user, String pass, String appName) throws AuthenticationException
-    {
+    public GoogleAnalyticsConnect(String serviceAccountId, File keyFile, String appName) throws AuthenticationException {
         this.as = new AnalyticsService(appName);
-        this.as.setUserCredentials(user, pass);
+
+        final List<String> scopes = Collections.singletonList(analyticsUrl);
+        try {
+            this.as.setOAuth2Credentials(getOAuthCredential(serviceAccountId, scopes, keyFile));
+        } catch (IOException | GeneralSecurityException e) {
+            e.printStackTrace(System.err);
+            throw new RuntimeException("Key File error:", e);
+        }
 
         try {
-            this.dataURL = new URL("https://www.google.com/analytics/feeds/data");
+            this.dataURL = new URL(analyticsUrl);
         }
         catch (MalformedURLException e) {
             System.err.println("Malformed data url. This is hardcoded and shouldn't be possible.");
@@ -79,5 +82,21 @@ public class GoogleAnalyticsConnect
             System.out.println(e.getResponseBody());
         }
         return null;
+    }
+
+    /**
+     * Get oath credentials for the specified scopes using a serviceAccountId and a file containing a key
+     */
+    private static GoogleCredential getOAuthCredential(String serviceAccountId, List<String> scopes, File keyFile)
+            throws IOException, GeneralSecurityException {
+        HttpTransport httpTransport = new NetHttpTransport();
+        JacksonFactory jsonFactory = new JacksonFactory();
+        return new GoogleCredential.Builder()
+                .setTransport(httpTransport)
+                .setJsonFactory(jsonFactory)
+                .setServiceAccountId(serviceAccountId)
+                .setServiceAccountScopes(scopes)
+                .setServiceAccountPrivateKeyFromP12File(keyFile)
+                .build();
     }
 }

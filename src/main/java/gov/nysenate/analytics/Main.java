@@ -104,10 +104,10 @@ public class Main
   {
     Section analyticsConfig = config.get("service:analytics");
     GoogleAnalyticsConnect googleConnector = new GoogleAnalyticsConnect(
-        analyticsConfig.get("user"),
-        analyticsConfig.get("pass"),
-        analyticsConfig.get("app_name")
-        );
+            analyticsConfig.get("service_account_id"),
+            new File(analyticsConfig.get("key_file")),
+            analyticsConfig.get("app_name")
+    );
 
     List<NYSenate> senatorData = Utils.getSenateData();
 
