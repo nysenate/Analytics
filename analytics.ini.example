@@ -138,6 +138,8 @@ metrics = ga:visits,ga:visitors,ga:pageViews,ga:bounces,ga:timeOnSite,ga:newVisi
 [service:analytics]
 user=
 pass=
+service_account_id=
+key_file=
 account_url=https://www.google.com/analytics/feeds/accounts/default
 data_url=https://www.google.com/analytics/feeds/data
 app_name= analytics
